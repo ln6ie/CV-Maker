@@ -15,6 +15,8 @@ export const GlassInput = ({
   error,
   isRTL = false,
   style,
+  multiline,
+  numberOfLines,
   ...props
 }: GlassInputProps) => {
   const theme = isDarkMode ? COLORS.app.dark : COLORS.app.light;
@@ -30,9 +32,10 @@ export const GlassInput = ({
       <View
         style={[
           styles.inputWrapper,
+          multiline && styles.inputWrapperMultiline,
           {
             backgroundColor: theme.inputBackground,
-            borderColor: error ? theme.error : theme.inputBorder,
+            borderColor: error ? theme.error : isDarkMode ? theme.inputBorder : 'rgba(0,0,0,0.05)',
           },
         ]}
       >
@@ -40,9 +43,13 @@ export const GlassInput = ({
           placeholderTextColor={isDarkMode ? '#636366' : '#C7C7CC'}
           style={[
             styles.input,
+            multiline && styles.inputMultiline,
             { color: theme.textBody, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 400) },
             style,
           ]}
+          multiline={multiline}
+          numberOfLines={multiline ? numberOfLines : undefined}
+          textAlignVertical={multiline ? 'top' : 'center'}
           {...props}
         />
       </View>
@@ -73,18 +80,26 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     justifyContent: 'center',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+  },
+  inputWrapperMultiline: {
+    paddingVertical: SPACING.md,
+    minHeight: 80,
   },
   input: {
     fontSize: TYPOGRAPHY.fontSize.md,
     padding: 0,
+    lineHeight: 22,
+  },
+  inputMultiline: {
+    minHeight: 60,
   },
   errorText: {
     fontSize: TYPOGRAPHY.fontSize.xs,

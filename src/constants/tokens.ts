@@ -25,20 +25,20 @@ export const COLORS = {
     light: {
       background: system('systemGroupedBackground', '#F2F2F7'),
       cardBackground: system('secondarySystemGroupedBackground', '#FFFFFF'),
-      cardBorder: system('separator', 'rgba(0, 0, 0, 0.1)'),
+      cardBorder: system('separator', 'rgba(60, 60, 67, 0.18)'),
       textPrimary: system('label', '#000000'),
       textSecondary: system('secondaryLabel', '#3C3C43'),
       textBody: system('label', '#000000'),
       placeholderText: system('placeholderText', '#C7C7CC'),
-      inputBackground: system('systemGray6', '#F2F2F7'),
-      inputBorder: system('separator', 'rgba(0, 32, 96, 0.15)'),
+      inputBackground: system('systemGray6', '#E5E5EA'),
+      inputBorder: system('separator', 'rgba(60, 60, 67, 0.18)'),
       buttonBackground: system('systemBlue', '#007AFF'),
       buttonText: '#FFFFFF',
-      accent: system('systemBlue', '#0055A5'),
+      accent: system('systemBlue', '#007AFF'),
       shadow: 'rgba(0, 0, 0, 0.05)',
-      error: system('systemRed', '#EF4444'),
-      success: system('systemGreen', '#10B981'),
-      borderMuted: system('separator', '#D1D1D6'),
+      error: system('systemRed', '#FF3B30'),
+      success: system('systemGreen', '#34C759'),
+      borderMuted: system('separator', '#C6C6C8'),
     },
     dark: {
       background: '#000000',
@@ -71,9 +71,9 @@ export const SPACING = {
 
 export const BORDER_RADIUS = {
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
+  md: 12,
+  lg: 16,
+  xl: 20,
   full: 9999,
 };
 
@@ -95,10 +95,6 @@ export const TYPOGRAPHY = {
   },
 };
 
-/**
- * Returns the correct font family based on language direction and desired weight.
- * Falls back to 'System' for LTR; uses Cairo variants for RTL Arabic text.
- */
 export const getFontFamily = (isRTL: boolean, weight: string | number = '400'): string => {
   if (!isRTL) return 'System';
   const w = typeof weight === 'string' ? parseInt(weight, 10) || 400 : weight;

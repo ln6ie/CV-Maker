@@ -7,15 +7,32 @@ interface SectionCardProps {
   theme: any;
   children: React.ReactNode;
   isRTL?: boolean;
+  isDarkMode?: boolean;
 }
 
-export const SectionCard = ({ title, theme, children, isRTL = false }: SectionCardProps) => {
+export const SectionCard = ({ title, theme, children, isRTL = false, isDarkMode = false }: SectionCardProps) => {
   return (
-    <View style={[styles.glassCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-      <Text style={[
-        styles.sectionHeading,
-        { color: theme.textPrimary, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 800) }
-      ]}>
+    <View
+      style={[
+        styles.baseCard,
+        isDarkMode
+          ? { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder, borderWidth: 1 }
+          : {
+              backgroundColor: theme.cardBackground,
+              shadowColor: '#000',
+              shadowOpacity: 0.04,
+              shadowRadius: 16,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 2,
+            },
+      ]}
+    >
+      <Text
+        style={[
+          styles.sectionHeading,
+          { color: theme.textPrimary, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 800) },
+        ]}
+      >
         {title}
       </Text>
       {children}
@@ -24,15 +41,10 @@ export const SectionCard = ({ title, theme, children, isRTL = false }: SectionCa
 };
 
 const styles = StyleSheet.create({
-  glassCard: {
+  baseCard: {
     borderRadius: BORDER_RADIUS.xl,
-    borderWidth: 1,
     padding: SPACING.md,
     marginBottom: SPACING.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   sectionHeading: {
     fontSize: TYPOGRAPHY.fontSize.lg,

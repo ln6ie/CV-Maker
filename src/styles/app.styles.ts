@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
 import { SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/tokens';
 
+export const FLOATING_HEADER_HEIGHT = 92;
+
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -8,16 +10,30 @@ export const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  floatingHeader: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  floatingBlur: {
+    overflow: 'hidden',
+  },
   scrollContent: {
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.xl,
     flexGrow: 1,
   },
+  stepperInsetCard: {
+    borderRadius: BORDER_RADIUS.sm,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
   stepperTrack: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.md,
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    gap: SPACING.xs,
   },
   stepIndicator: {
     flex: 1,
@@ -54,6 +70,30 @@ export const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  experienceSubCard: {
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  removeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: BORDER_RADIUS.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButton: {
+    borderRadius: BORDER_RADIUS.lg,
+    paddingVertical: SPACING.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.sm,
+  },
+  addButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: '800',
     letterSpacing: 1,
   },

@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  View,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
   KeyboardAvoidingView,
   Platform,
   Modal,
   ActionSheetIOS,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Cairo_400Regular, Cairo_700Bold, Cairo_900Black } from '@expo-google-fonts/cairo';
-import { COLORS, getFontFamily } from './src/constants/tokens';
+import { COLORS, getFontFamily, SPACING } from './src/constants/tokens';
 import { translations } from './src/constants/translations';
 import { useCV } from './src/hooks/useCV';
 import { GlassInput } from './src/components/GlassInput';
 import { StatusBanner } from './src/components/StatusBanner';
 import { Header } from './src/components/Header';
 import { SectionCard } from './src/components/SectionCard';
-import { ExperiencePreview } from './src/components/ExperiencePreview';
 import { Splash } from './src/components/Splash';
 import { Education } from './src/types/cv';
-import { styles } from './src/styles/app.styles';
+import { styles, FLOATING_HEADER_HEIGHT } from './src/styles/app.styles';
 
-export default function App() {
+function AppContent() {
+  const insets = useSafeAreaInsets();
   const [showSplash, setShowSplash] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -32,7 +34,7 @@ export default function App() {
   const [activeLanguage, setActiveLanguage] = useState<'en' | 'ar'>('en');
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
 
-  useFonts({
+  const [fontsLoaded] = useFonts({
     'Cairo': Cairo_400Regular,
     'Cairo-Bold': Cairo_700Bold,
     'Cairo-Black': Cairo_900Black,
@@ -47,13 +49,18 @@ export default function App() {
     updateField,
     updateSkillsString,
     updateCoursesString,
+    updateWorkExperience,
+    updateWorkExperienceTask,
+    addWorkExperienceTask,
+    addWorkExperience,
+    removeWorkExperience,
     validationErrors,
     isLoading,
     systemError,
     handleGeneratePDF,
   } = useCV();
 
-  if (showSplash) {
+  if (showSplash || !fontsLoaded) {
     return <Splash onFinish={() => setShowSplash(false)} />;
   }
 
@@ -111,45 +118,55 @@ export default function App() {
     ? { flexDirection: 'row-reverse' as const }
     : { flexDirection: 'row' as const };
 
+  const headerTopPadding = FLOATING_HEADER_HEIGHT + insets.top + SPACING.sm;
+  const FAB_SIZE = 56;
+  const bottomPadding = insets.bottom + FAB_SIZE + SPACING.lg + SPACING.md;
+
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: theme.background }]}>
-      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
-      >
-        <Header
-          isDarkMode={isDarkMode}
-          onOpenSettings={handleOpenSettings}
-          theme={theme}
-          isRTL={isRTL}
-          t={t}
-        />
+    <View style={[styles.root, { backgroundColor: theme.background }]}>
+      <StatusBar translucent={true} style={isDarkMode ? 'light' : 'dark'} />
 
-        <View style={[styles.stepperTrack, rtlRow]}>
-          {[0, 1, 2, 3].map((stepIdx) => (
-            <View
-              key={stepIdx}
-              style={[
-                styles.stepIndicator,
-                {
-                  backgroundColor:
-                    stepIdx <= activeStep ? theme.textPrimary : theme.borderMuted,
-                },
-              ]}
-            />
-          ))}
-        </View>
+      {/* Edge-to-edge Glass Header (extends under Status Bar) */}
+      <View style={[styles.floatingHeader, { top: 0 }]}>
+        <BlurView intensity={90} tint={isDarkMode ? 'dark' : 'light'} style={styles.floatingBlur}>
+          <View style={{ paddingTop: insets.top }}>
+            <Header isDarkMode={isDarkMode} onOpenSettings={handleOpenSettings} theme={theme} isRTL={isRTL} t={t} />
 
+          <View style={[styles.stepperInsetCard, { backgroundColor: theme.inputBackground }]}>
+            <View style={[styles.stepperTrack, rtlRow]}>
+              {[0, 1, 2, 3].map((stepIdx) => (
+                <View
+                  key={stepIdx}
+                  style={[
+                    styles.stepIndicator,
+                    { backgroundColor: stepIdx <= activeStep ? theme.textPrimary : theme.borderMuted },
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+          </View>
+        </BlurView>
+      </View>
+
+      {/* Main Scrollable Content */}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ paddingTop: headerTopPadding, paddingBottom: bottomPadding, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <StatusBanner isDarkMode={isDarkMode} isLoading={isLoading} error={systemError} isRTL={isRTL} translations={t.status} />
+          <StatusBanner
+            isDarkMode={isDarkMode}
+            isLoading={isLoading}
+            error={systemError}
+            isRTL={isRTL}
+            translations={t.status}
+          />
 
+          {/* STEP 0: Personal Summary */}
           {activeStep === 0 && (
-            <SectionCard title={t.steps.personal} theme={theme} isRTL={isRTL}>
+            <SectionCard title={t.steps.personal} theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
               <GlassInput
                 label={t.labels.fullName}
                 value={cvData.fullName}
@@ -203,19 +220,132 @@ export default function App() {
             </SectionCard>
           )}
 
+          {/* STEP 1: Dynamic Work Experience */}
           {activeStep === 1 && (
-            <SectionCard
-              title={`${t.steps.experience} (${cvData.workExperience.length} items)`}
-              theme={theme}
-              isRTL={isRTL}
-            >
-              <ExperiencePreview workExperience={cvData.workExperience} theme={theme} isRTL={isRTL} />
-            </SectionCard>
+            <View>
+              <SectionCard
+                title={`${t.steps.experience} (${cvData.workExperience.length} items)`}
+                theme={theme}
+                isRTL={isRTL}
+                isDarkMode={isDarkMode}
+              >
+                {cvData.workExperience.length === 0 && (
+                  <Text style={{ color: theme.textSecondary, textAlign: 'center', marginVertical: SPACING.lg, fontFamily: getFontFamily(isRTL, 400) }}>
+                    No experience entries yet. Add one below.
+                  </Text>
+                )}
+
+                {cvData.workExperience.map((exp, expIdx) => (
+                  <View
+                    key={`exp-form-${expIdx}`}
+                    style={[
+                      styles.experienceSubCard,
+                      { backgroundColor: theme.inputBackground },
+                      expIdx < cvData.workExperience.length - 1 && { marginBottom: SPACING.md },
+                    ]}
+                  >
+                    <View style={[rtlRow, { justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm }]}>
+                      <Text style={{ color: theme.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: getFontFamily(isRTL, 700) }}>
+                        #{expIdx + 1}
+                      </Text>
+                      <TouchableOpacity
+                        style={[styles.removeButton, { backgroundColor: isDarkMode ? 'rgba(255,69,58,0.15)' : 'rgba(255,59,48,0.1)' }]}
+                        onPress={() => removeWorkExperience(expIdx)}
+                      >
+                        <Ionicons name="trash-outline" size={16} color={theme.error} />
+                      </TouchableOpacity>
+                    </View>
+
+                    <GlassInput
+                      label="Job Title"
+                      value={exp.jobTitle}
+                      onChangeText={(val: string) => updateWorkExperience(expIdx, 'jobTitle', val)}
+                      placeholder="e.g. Software Engineer"
+                      isDarkMode={isDarkMode}
+                      isRTL={isRTL}
+                    />
+                    <GlassInput
+                      label="Company / Location"
+                      value={exp.companyLocation}
+                      onChangeText={(val: string) => updateWorkExperience(expIdx, 'companyLocation', val)}
+                      placeholder="e.g. Tech Corp - New York"
+                      isDarkMode={isDarkMode}
+                      isRTL={isRTL}
+                    />
+                    <GlassInput
+                      label="Date Range"
+                      value={exp.dateRange}
+                      onChangeText={(val: string) => updateWorkExperience(expIdx, 'dateRange', val)}
+                      placeholder="e.g. Jan 2020 - Present"
+                      isDarkMode={isDarkMode}
+                      isRTL={isRTL}
+                    />
+
+                    <Text
+                      style={{
+                        color: theme.textSecondary,
+                        fontSize: 12,
+                        fontWeight: '600',
+                        letterSpacing: 0.5,
+                        marginBottom: SPACING.xs,
+                        paddingLeft: SPACING.xs,
+                        textTransform: 'uppercase',
+                        fontFamily: getFontFamily(isRTL, 600),
+                      }}
+                    >
+                      Main Tasks
+                    </Text>
+
+                    {exp.mainTasks.map((task, taskIdx) => (
+                      <GlassInput
+                        key={`task-${expIdx}-${taskIdx}`}
+                        label={`Task ${taskIdx + 1}`}
+                        value={task}
+                        onChangeText={(val: string) => updateWorkExperienceTask(expIdx, taskIdx, val)}
+                        placeholder="Describe a responsibility or achievement"
+                        isDarkMode={isDarkMode}
+                        isRTL={isRTL}
+                        multiline
+                        numberOfLines={2}
+                      />
+                    ))}
+
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: isRTL ? 'row-reverse' : 'row',
+                        alignItems: 'center',
+                        gap: SPACING.xs,
+                        paddingVertical: SPACING.sm,
+                      }}
+                      onPress={() => addWorkExperienceTask(expIdx)}
+                    >
+                      <Ionicons name="add-circle-outline" size={18} color={theme.accent} />
+                      <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '700', fontFamily: getFontFamily(isRTL, 700) }}>
+                        Add Task
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  style={[styles.addButton, { backgroundColor: theme.accent }]}
+                  onPress={addWorkExperience}
+                >
+                  <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: SPACING.xs }}>
+                    <Ionicons name="add" size={18} color="#FFFFFF" />
+                    <Text style={[styles.addButtonText, { color: '#FFFFFF', fontFamily: getFontFamily(isRTL, 800) }]}>
+                      Add New Experience
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </SectionCard>
+            </View>
           )}
 
+          {/* STEP 2: Education & Skills */}
           {activeStep === 2 && (
             <View>
-              <SectionCard title={t.steps.education} theme={theme} isRTL={isRTL}>
+              <SectionCard title={t.steps.education} theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
                 <GlassInput
                   label={t.labels.degree}
                   value={cvData.education[0]?.degree || ''}
@@ -249,7 +379,7 @@ export default function App() {
                   isRTL={isRTL}
                 />
               </SectionCard>
-              <SectionCard title={t.steps.skills} theme={theme} isRTL={isRTL}>
+              <SectionCard title={t.steps.skills} theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
                 <GlassInput
                   label={t.labels.skills}
                   value={activeSkillsText}
@@ -270,9 +400,10 @@ export default function App() {
             </View>
           )}
 
+          {/* STEP 3: Language & Export */}
           {activeStep === 3 && (
             <View>
-              <SectionCard title={t.steps.language} theme={theme} isRTL={isRTL}>
+              <SectionCard title={t.steps.language} theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
                 <GlassInput
                   label={t.labels.arabicLevel}
                   value={cvData.languages[0]?.level || ''}
@@ -291,53 +422,92 @@ export default function App() {
                 />
               </SectionCard>
 
-              <TouchableOpacity
-                style={[styles.primaryButton, { backgroundColor: theme.buttonBackground }]}
-                activeOpacity={0.85}
-                onPress={() => handleGeneratePDF(isDarkMode, pdfLang)}
-                disabled={isLoading}
-              >
-                <Text style={[
-                  styles.primaryButtonText,
-                  { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }
-                ]}>
-                  {isLoading ? t.buttons.generating : t.buttons.export}
-                </Text>
-              </TouchableOpacity>
             </View>
           )}
 
-          <View style={[styles.navRow, rtlRow]}>
-            {activeStep > 0 && (
-              <TouchableOpacity
-                style={[styles.navButton, { backgroundColor: theme.borderMuted }]}
-                onPress={() => setActiveStep((prev) => prev - 1)}
-              >
-                <Text style={[
-                  styles.navButtonText,
-                  { color: theme.textSecondary, fontFamily: getFontFamily(isRTL, 800) }
-                ]}>
-                  {t.buttons.back}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {activeStep < 3 && (
-              <TouchableOpacity
-                style={[styles.navButton, { backgroundColor: theme.buttonBackground, flex: 1 }]}
-                onPress={() => setActiveStep((prev) => prev + 1)}
-              >
-                <Text style={[
-                  styles.navButtonText,
-                  { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }
-                ]}>
-                  {t.buttons.next}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Floating Bottom Navigation — Circular FABs */}
+      <View
+        style={{
+          position: 'absolute',
+          bottom: insets.bottom + SPACING.lg,
+          right: SPACING.lg,
+          left: SPACING.lg,
+          flexDirection: isRTL ? 'row-reverse' : 'row',
+          alignItems: 'center',
+          zIndex: 50,
+          pointerEvents: 'box-none',
+        }}
+      >
+        {activeStep > 0 && (
+          <TouchableOpacity
+            style={{
+              width: FAB_SIZE,
+              height: FAB_SIZE,
+              borderRadius: 9999,
+              backgroundColor: theme.borderMuted,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            activeOpacity={0.7}
+            onPress={() => setActiveStep((prev) => prev - 1)}
+          >
+            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={theme.textSecondary} />
+          </TouchableOpacity>
+        )}
+        <View style={{ flex: 1 }} />
+        {activeStep < 3 ? (
+          <TouchableOpacity
+            style={{
+              width: FAB_SIZE,
+              height: FAB_SIZE,
+              borderRadius: 9999,
+              backgroundColor: theme.buttonBackground,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            activeOpacity={0.7}
+            onPress={() => setActiveStep((prev) => prev + 1)}
+          >
+            <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={24} color={theme.buttonText} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={{
+              width: FAB_SIZE,
+              height: FAB_SIZE,
+              borderRadius: 9999,
+              backgroundColor: theme.buttonBackground,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            activeOpacity={0.7}
+            onPress={() => handleGeneratePDF(isDarkMode, pdfLang)}
+            disabled={isLoading}
+          >
+            <Ionicons name="share-outline" size={24} color={theme.buttonText} />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Settings Modal */}
       <Modal
         visible={isSettingsVisible}
         transparent
@@ -355,20 +525,14 @@ export default function App() {
               { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
             ]}
           >
-            <Text style={[
-              styles.sheetTitle,
-              { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 800) }
-            ]}>
+            <Text style={[styles.sheetTitle, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 800) }]}>
               {t.preferences.title}
             </Text>
             <TouchableOpacity
               style={[styles.sheetButton, { backgroundColor: theme.inputBackground }]}
               onPress={() => setIsDarkMode((prev) => !prev)}
             >
-              <Text style={[
-                styles.sheetButtonText,
-                { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }
-              ]}>
+              <Text style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}>
                 {t.preferences.toggleTheme}
               </Text>
             </TouchableOpacity>
@@ -380,10 +544,7 @@ export default function App() {
                 setPdfLang(nextLang);
               }}
             >
-              <Text style={[
-                styles.sheetButtonText,
-                { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }
-              ]}>
+              <Text style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}>
                 {isRTL ? t.preferences.pdfLangAr : t.preferences.pdfLang}
               </Text>
             </TouchableOpacity>
@@ -391,16 +552,21 @@ export default function App() {
               style={[styles.cancelButton, { backgroundColor: theme.buttonBackground }]}
               onPress={() => setIsSettingsVisible(false)}
             >
-              <Text style={[
-                styles.cancelButtonText,
-                { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }
-              ]}>
+              <Text style={[styles.cancelButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
                 {t.buttons.close}
               </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }

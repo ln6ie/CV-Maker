@@ -20,26 +20,25 @@ export const Header = ({ isDarkMode, onOpenSettings, theme, isRTL, t }: HeaderPr
         { flexDirection: isRTL ? 'row-reverse' : 'row' },
       ]}
     >
-      <View style={isRTL ? { alignItems: 'flex-end' } : undefined}>
+      {/* Minimalist Logo Mark */}
+      <View style={styles.logoMark}>
+        <View style={[styles.logoBox, { backgroundColor: theme.buttonBackground }]}>
+          <Text style={[styles.logoText, { color: theme.buttonText }]}>CV</Text>
+        </View>
         <Text style={[
-          styles.appTitle,
-          { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 900) }
-        ]}>
-          {t.app.title}
-        </Text>
-        <Text style={[
-          styles.appSubtitle,
-          { color: theme.textSecondary, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 700) }
+          styles.logoCaption,
+          { color: theme.textSecondary, fontFamily: getFontFamily(isRTL, 700) }
         ]}>
           {t.app.subtitle}
         </Text>
       </View>
+
       <TouchableOpacity
         onPress={onOpenSettings}
         activeOpacity={0.85}
         style={[
           styles.settingsButton,
-          { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
+          { backgroundColor: 'rgba(150, 150, 150, 0.15)' },
         ]}
       >
         <Ionicons name="settings-outline" size={22} color={theme.textPrimary} />
@@ -52,25 +51,37 @@ const styles = StyleSheet.create({
   headerContainer: {
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
-    marginTop: Platform.OS === 'android' ? SPACING.md : 0,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === 'android' ? SPACING.md : SPACING.sm,
+    paddingBottom: SPACING.md,
   },
-  appTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+  logoMark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  logoBox: {
+    width: 36,
+    height: 36,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: -0.5,
   },
-  appSubtitle: {
+  logoCaption: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 1,
   },
   settingsButton: {
-    borderWidth: 1,
     borderRadius: BORDER_RADIUS.full,
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
     shadowOffset: { width: 0, height: 2 },
