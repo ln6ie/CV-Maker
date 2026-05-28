@@ -1,17 +1,18 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/tokens';
 
 interface HeaderProps {
   isDarkMode: boolean;
-  onToggleTheme: () => void;
+  onOpenSettings: () => void;
   theme: any;
 }
 
 /**
- * Top application header containing the brand name and the OLED-optimized Light/Dark toggle.
+ * Top application header containing the brand name and the iOS gear button for Action Sheet settings.
  */
-export const Header = ({ isDarkMode, onToggleTheme, theme }: HeaderProps) => {
+export const Header = ({ isDarkMode, onOpenSettings, theme }: HeaderProps) => {
   return (
     <View style={styles.headerContainer}>
       <View>
@@ -23,16 +24,14 @@ export const Header = ({ isDarkMode, onToggleTheme, theme }: HeaderProps) => {
         </Text>
       </View>
       <TouchableOpacity
-        onPress={onToggleTheme}
-        activeOpacity={0.8}
+        onPress={onOpenSettings}
+        activeOpacity={0.85}
         style={[
-          styles.themeToggle,
+          styles.settingsButton,
           { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
         ]}
       >
-        <Text style={[styles.themeToggleText, { color: theme.textPrimary }]}>
-          {isDarkMode ? 'LIGHT MODE' : 'DARK MODE'}
-        </Text>
+        <Ionicons name="settings-outline" size={22} color={theme.textPrimary} />
       </TouchableOpacity>
     </View>
   );
@@ -57,17 +56,16 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
-  themeToggle: {
+  settingsButton: {
     borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.sm + 2,
+    borderRadius: BORDER_RADIUS.full,
+    width: 42,
+    height: 42,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  themeToggleText: {
-    fontSize: TYPOGRAPHY.fontSize.xs - 2,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });

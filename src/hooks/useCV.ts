@@ -60,7 +60,7 @@ export const useCV = () => {
   /**
    * Validates data with Zod and generates the PDF output.
    */
-  const handleGeneratePDF = async (isDarkMode: boolean) => {
+  const handleGeneratePDF = async (isDarkMode: boolean, lang: 'en' | 'ar' = 'en') => {
     setIsLoading(true);
     setSystemError(null);
     setValidationErrors({});
@@ -82,7 +82,7 @@ export const useCV = () => {
       }
 
       // Generate the production A4 html template string
-      const html = generateCVTemplate(validation.data, isDarkMode);
+      const html = generateCVTemplate(validation.data, isDarkMode, lang);
 
       // Render the PDF to local storage file
       const { uri } = await Print.printToFileAsync({ html });

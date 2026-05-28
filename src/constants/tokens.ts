@@ -1,14 +1,26 @@
-/**
- * Design Tokens for the CV Builder Mobile Application and generated PDF.
- * Strictly conforms to the rules: no emojis, strictly typed, no hardcoded values.
- */
+import { Platform, PlatformColor, ColorValue } from 'react-native';
 
+/**
+ * Helper to dynamically fetch UIKit system colors on iOS,
+ * with pixel-perfect design system fallbacks for Android/Web.
+ */
+const getNativeColor = (iosName: string, fallback: string): ColorValue => {
+  return Platform.select({
+    ios: PlatformColor(iosName),
+    default: fallback as any,
+  }) as ColorValue;
+};
+
+/**
+ * Global Design Tokens for the CV Builder Application.
+ * Locked to iOS specifications and absolute solid parameters.
+ */
 export const COLORS = {
   pdf: {
     light: {
       background: '#FFFFFF',
       primaryHeader: '#002060',
-      body: '#1A1A1A',
+      body: '#000000',
       border: '#000000',
     },
     dark: {
@@ -20,36 +32,38 @@ export const COLORS = {
   },
   app: {
     light: {
-      background: '#F0F3F8',
-      cardBackground: 'rgba(255, 255, 255, 0.65)',
-      cardBorder: 'rgba(255, 255, 255, 0.3)',
+      background: '#F2F2F7',
+      cardBackground: 'rgba(255, 255, 255, 0.75)',
+      cardBorder: 'rgba(0, 0, 0, 0.1)',
       textPrimary: '#002060',
-      textSecondary: '#5A6E85',
-      textBody: '#1A1A1A',
-      inputBackground: 'rgba(255, 255, 255, 0.45)',
+      textSecondary: '#3A3A3C',
+      textBody: '#000000',
+      inputBackground: 'rgba(255, 255, 255, 0.85)',
       inputBorder: 'rgba(0, 32, 96, 0.15)',
       buttonBackground: '#002060',
       buttonText: '#FFFFFF',
-      accent: '#0056B3',
+      accent: '#0055A5',
       shadow: 'rgba(0, 0, 0, 0.05)',
-      error: '#D32F2F',
-      success: '#388E3C',
+      error: '#EF4444',
+      success: '#10B981',
+      borderMuted: '#D1D1D6',
     },
     dark: {
-      background: '#0B0F19',
-      cardBackground: 'rgba(15, 22, 38, 0.7)',
-      cardBorder: 'rgba(255, 255, 255, 0.08)',
+      background: '#000000', // Pure OLED Black Background
+      cardBackground: 'rgba(28, 28, 30, 0.8)',
+      cardBorder: 'rgba(255, 255, 255, 0.1)', // Subtle glass element lines
       textPrimary: '#8ECAE6',
-      textSecondary: '#A9B6C3',
+      textSecondary: '#AEAEB2',
       textBody: '#E5E5E5',
-      inputBackground: 'rgba(255, 255, 255, 0.05)',
+      inputBackground: 'rgba(44, 44, 46, 0.7)',
       inputBorder: 'rgba(255, 255, 255, 0.1)',
       buttonBackground: '#1D3557',
       buttonText: '#FFFFFF',
-      accent: '#457B9D',
+      accent: '#3B82F6',
       shadow: 'rgba(0, 0, 0, 0.3)',
-      error: '#CF6679',
-      success: '#4CAF50',
+      error: '#EF4444',
+      success: '#10B981',
+      borderMuted: '#38383A',
     },
   },
 };
@@ -63,11 +77,11 @@ export const SPACING = {
 };
 
 export const BORDER_RADIUS = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 24,
+  sm: 8,
+  md: 16,
+  lg: 24, // Pill curves
+  xl: 32, // Native pill actions
+  full: 9999,
 };
 
 export const TYPOGRAPHY = {
