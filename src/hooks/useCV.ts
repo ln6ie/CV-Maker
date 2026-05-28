@@ -46,6 +46,18 @@ export const useCV = () => {
   };
 
   /**
+   * Helper to update courses from a raw comma-separated string input.
+   */
+  const updateCoursesString = (coursesStr: string) => {
+    const list = coursesStr
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    
+    updateField('courses', list);
+  };
+
+  /**
    * Validates data with Zod and generates the PDF output.
    */
   const handleGeneratePDF = async (isDarkMode: boolean) => {
@@ -93,6 +105,7 @@ export const useCV = () => {
     cvData,
     updateField,
     updateSkillsString,
+    updateCoursesString,
     validationErrors,
     isLoading,
     systemError,

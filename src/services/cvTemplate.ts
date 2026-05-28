@@ -2,8 +2,8 @@ import { CVData } from '../types/cv';
 import { COLORS } from '../constants/tokens';
 
 /**
- * Generates an A4 optimized HTML/CSS template for expo-print.
- * Supports complete toggle between Light and Dark mode options.
+ * Generates a standard A4 optimized HTML/CSS template for expo-print.
+ * Fully supports Page 1 and Page 2 multi-page layout structures.
  *
  * @param data Strict CVData validated by Zod
  * @param isDarkMode Flag for Dark Mode rendering
@@ -12,10 +12,15 @@ import { COLORS } from '../constants/tokens';
 export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string => {
   const colors = isDarkMode ? COLORS.pdf.dark : COLORS.pdf.light;
 
-  // Split skills list evenly into two columns to mirror the exact dual-column layout of image.png
+  // Split skills list evenly into two columns using a rigid table layout
   const halfSkills = Math.ceil(data.skills.length / 2);
   const leftSkills = data.skills.slice(0, halfSkills);
   const rightSkills = data.skills.slice(halfSkills);
+
+  // Split courses list evenly into two columns
+  const halfCourses = Math.ceil(data.courses.length / 2);
+  const leftCourses = data.courses.slice(0, halfCourses);
+  const rightCourses = data.courses.slice(halfCourses);
 
   return `
     <!DOCTYPE html>
@@ -36,14 +41,15 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
           font-size: 14px;
           line-height: 1.5;
           padding: 40px;
-          width: 210mm; /* A4 standard width */
-          min-height: 297mm; /* A4 standard height */
+          width: 210mm; /* Standard A4 width */
+          min-height: 297mm; /* Standard A4 height */
           margin-left: auto;
           margin-right: auto;
         }
         .header {
           text-align: center;
           margin-bottom: 20px;
+          page-break-inside: avoid;
         }
         .fullname {
           font-size: 32px;
@@ -63,13 +69,18 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
           text-align: center;
           margin-bottom: 15px;
         }
+        .section-container {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          margin-bottom: 25px;
+        }
         .section-title {
           font-size: 18px;
           font-weight: bold;
           color: ${colors.primaryHeader};
           border-bottom: 2px solid ${colors.border};
           padding-bottom: 4px;
-          margin-top: 25px;
+          margin-top: 15px;
           margin-bottom: 12px;
           text-transform: capitalize;
           letter-spacing: 0.5px;
@@ -79,20 +90,23 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
           margin-bottom: 15px;
           color: ${colors.body};
         }
-        .skills-container {
-          display: flex;
-          justify-content: space-between;
+        .two-column-table {
           width: 100%;
-          margin-bottom: 15px;
+          border-collapse: collapse;
+          border: none;
+          margin-bottom: 10px;
         }
-        .skills-column {
-          width: 48%;
+        .two-column-table td {
+          width: 50%;
+          vertical-align: top;
+          border: none;
+          padding: 0 10px 0 0;
         }
-        .skills-column ul {
+        .two-column-table ul {
           list-style-type: disc;
           padding-left: 20px;
         }
-        .skills-column li {
+        .two-column-table li {
           margin-bottom: 5px;
           color: ${colors.body};
         }
@@ -102,7 +116,7 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
           gap: 20px;
         }
         .job-block {
-          page-break-inside: avoid; /* Essential page rule to prevent vertical split cuts */
+          page-break-inside: avoid; /* Prevent job blocks splitting across pages */
           break-inside: avoid;
         }
         .job-title {
@@ -139,9 +153,44 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
           margin-bottom: 4px;
           color: ${colors.body};
         }
+        .education-block {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          margin-bottom: 15px;
+        }
+        .edu-degree {
+          font-size: 15px;
+          font-weight: bold;
+          color: ${colors.body};
+          margin-bottom: 3px;
+        }
+        .edu-institution {
+          font-size: 14px;
+          font-weight: bold;
+          color: ${colors.body};
+          margin-bottom: 4px;
+        }
+        .edu-notes {
+          font-size: 14px;
+          font-style: italic;
+          color: ${colors.body};
+        }
+        .languages-list {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .lang-item {
+          font-size: 14px;
+          color: ${colors.body};
+        }
+        .lang-name {
+          font-weight: bold;
+        }
       </style>
     </head>
     <body>
+      <!-- Header -->
       <div class="header">
         <h1 class="fullname">${data.fullName}</h1>
         <div class="contact-box">
@@ -149,28 +198,33 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
         </div>
       </div>
 
-      <div>
+      <!-- Summary Section -->
+      <div class="section-container">
         <h2 class="section-title">Summary</h2>
         <p class="summary-text">${data.summary}</p>
       </div>
 
-      <div>
+      <!-- Skills Section -->
+      <div class="section-container">
         <h2 class="section-title">Skills</h2>
-        <div class="skills-container">
-          <div class="skills-column">
-            <ul>
-              ${leftSkills.map(skill => `<li>${skill}</li>`).join('')}
-            </ul>
-          </div>
-          <div class="skills-column">
-            <ul>
-              ${rightSkills.map(skill => `<li>${skill}</li>`).join('')}
-            </ul>
-          </div>
-        </div>
+        <table class="two-column-table">
+          <tr>
+            <td>
+              <ul>
+                ${leftSkills.map(skill => `<li>${skill}</li>`).join('')}
+              </ul>
+            </td>
+            <td>
+              <ul>
+                ${rightSkills.map(skill => `<li>${skill}</li>`).join('')}
+              </ul>
+            </td>
+          </tr>
+        </table>
       </div>
 
-      <div>
+      <!-- Work Experience Section -->
+      <div class="section-container">
         <h2 class="section-title">Work Experience</h2>
         <div class="experience-list">
           ${data.workExperience.map(exp => `
@@ -182,6 +236,49 @@ export const generateCVTemplate = (data: CVData, isDarkMode: boolean): string =>
               <ul class="tasks-list">
                 ${exp.mainTasks.map(task => `<li>${task}</li>`).join('')}
               </ul>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Education Section -->
+      <div class="section-container">
+        <h2 class="section-title">Education</h2>
+        ${data.education.map(edu => `
+          <div class="education-block">
+            <h3 class="edu-degree">${edu.degree}</h3>
+            <p class="edu-institution">${edu.institution} ${edu.year}</p>
+            ${edu.notes ? `<p class="edu-notes">${edu.notes}</p>` : ''}
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Courses Section -->
+      <div class="section-container">
+        <h2 class="section-title">Courses</h2>
+        <table class="two-column-table">
+          <tr>
+            <td>
+              <ul>
+                ${leftCourses.map(course => `<li>${course}</li>`).join('')}
+              </ul>
+            </td>
+            <td>
+              <ul>
+                ${rightCourses.map(course => `<li>${course}</li>`).join('')}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Languages Section -->
+      <div class="section-container">
+        <h2 class="section-title">Languages</h2>
+        <div class="languages-list">
+          ${data.languages.map(lang => `
+            <div class="lang-item">
+              <span class="lang-name">${lang.name}:</span> ${lang.level}
             </div>
           `).join('')}
         </div>

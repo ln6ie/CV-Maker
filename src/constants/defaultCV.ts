@@ -1,9 +1,8 @@
 import { CVData } from '../types/cv';
 
 /**
- * Default CV data matching the image.png exactly.
- * Prefilled so the app works instantly out-of-the-box.
- * Conforms to no-emoji requirements.
+ * Prefilled CV data matching page 1 (image.png) and page 2 (photo_4956313490343791523_w.jpg) exactly.
+ * No emojis, fully typed.
  */
 export const DEFAULT_CV: CVData = {
   fullName: 'Abdullah Karim Hussein',
@@ -101,6 +100,48 @@ export const DEFAULT_CV: CVData = {
         'Ensured functionality, safety, and aesthetic quality of finished models.',
         'Delivered projects on time, ready for academic evaluation.',
       ],
+    },
+    {
+      jobTitle: 'Tech Content Creator & Developer',
+      companyLocation: 'Social Media Content Creator - @elcomengineering | Freelance Work',
+      dateRange: '2024 - Present',
+      mainTasks: [
+        'Created and shared engaging tech content on social Media, reaching over 20,000 followers.',
+        'Built websites and mobile applications using modern technologies (e.g. Python, React Native, Node.js).',
+        'Set up and managed private servers for hosting bots, models, and client solutions.',
+        'Provided tutorials and tech tips covering AI tools, development workflows, and automation.',
+        'Collaborated with clients and followers to build personalized tech solutions.',
+        'Focused on combining educational content with real-world applications.',
+      ],
+    },
+  ],
+  education: [
+    {
+      degree: 'Bachelors of electromechanical Engineering',
+      institution: 'Southern Technical University',
+      year: '2025',
+      notes: 'Achieved a high academic standing among the top students in the department.',
+    },
+  ],
+  courses: [
+    'Safety of Warehouses from Risks, Organization and Arrangement of Stories',
+    'Diesel Engine and how it\'s work',
+    'HVAC',
+    'NEBOSH Complete Course',
+    'Generators Works',
+    'Microsoft Office',
+    'Complete Course about Wind turbine and Solar photovoltaic',
+    'Electric vehicle',
+    'Python - JavaScript',
+  ],
+  languages: [
+    {
+      name: 'Arabic',
+      level: 'Native language',
+    },
+    {
+      name: 'English',
+      level: 'Reading, writing and speaking',
     },
   ],
 };

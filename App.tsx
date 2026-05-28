@@ -14,11 +14,16 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from './src/constants/toke
 import { useCV } from './src/hooks/useCV';
 import { GlassInput } from './src/components/GlassInput';
 import { StatusBanner } from './src/components/StatusBanner';
+import { Header } from './src/components/Header';
+import { SectionCard } from './src/components/SectionCard';
+import { ExperiencePreview } from './src/components/ExperiencePreview';
+import { EducationPreview } from './src/components/EducationPreview';
+import { LanguagePreview } from './src/components/LanguagePreview';
+import { Education } from './src/types/cv';
 
 /**
- * Main CV Builder Application.
- * Follows premium glassmorphic mobile styling.
- * Supports on-the-fly toggling between Light and OLED Dark modes.
+ * Clean root CV Builder Application supporting dual-page layouts (image.png & Page 2).
+ * Styled cleanly with modular components under the 250-line restriction.
  */
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -28,6 +33,7 @@ export default function App() {
     cvData,
     updateField,
     updateSkillsString,
+    updateCoursesString,
     validationErrors,
     isLoading,
     systemError,
@@ -35,6 +41,29 @@ export default function App() {
   } = useCV();
 
   const activeSkillsText = cvData.skills.join(', ');
+  const activeCoursesText = cvData.courses.join(', ');
+
+  /**
+   * Helper to update the first education record dynamically.
+   */
+  const handleUpdateEducation = (field: keyof Education, val: string) => {
+    const list = [...cvData.education];
+    if (list[0]) {
+      list[0] = { ...list[0], [field]: val };
+      updateField('education', list);
+    }
+  };
+
+  /**
+   * Helper to update proficiency level for a specific language record.
+   */
+  const handleUpdateLanguage = (idx: number, level: string) => {
+    const list = [...cvData.languages];
+    if (list[idx]) {
+      list[idx] = { ...list[idx], level };
+      updateField('languages', list);
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: theme.background }]}>
@@ -47,42 +76,22 @@ export default function App() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header & Theme Toggle */}
-          <View style={styles.headerContainer}>
-            <View>
-              <Text style={[styles.appTitle, { color: theme.textPrimary }]}>
-                CV BUILDER
-              </Text>
-              <Text style={[styles.appSubtitle, { color: theme.textSecondary }]}>
-                A4 PDF Creator
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setIsDarkMode((prev) => !prev)}
-              activeOpacity={0.8}
-              style={[
-                styles.themeToggle,
-                { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
-              ]}
-            >
-              <Text style={[styles.themeToggleText, { color: theme.textPrimary }]}>
-                {isDarkMode ? 'LIGHT MODE' : 'DARK MODE'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {/* Header */}
+          <Header
+            isDarkMode={isDarkMode}
+            onToggleTheme={() => setIsDarkMode((prev) => !prev)}
+            theme={theme}
+          />
 
-          {/* Validation & System Status Banners */}
+          {/* Loading, Empty, and Error Handler banner */}
           <StatusBanner
             isDarkMode={isDarkMode}
             isLoading={isLoading}
             error={systemError}
           />
 
-          {/* Form Card: Personal Details */}
-          <View style={[styles.glassCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>
-              Personal Details
-            </Text>
+          {/* Section: Personal Info */}
+          <SectionCard title="Personal Details" theme={theme}>
             <GlassInput
               label="Full Name"
               value={cvData.fullName}
@@ -118,15 +127,12 @@ export default function App() {
               isDarkMode={isDarkMode}
               error={validationErrors['email']}
             />
-          </View>
+          </SectionCard>
 
-          {/* Form Card: Professional Profile */}
-          <View style={[styles.glassCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>
-              Profile Summary
-            </Text>
+          {/* Section: Summary Profile */}
+          <SectionCard title="Profile Summary" theme={theme}>
             <GlassInput
-              label="Summary"
+              label="Summary Details"
               value={cvData.summary}
               onChangeText={(val: string) => updateField('summary', val)}
               placeholder="Brief summary of professional experience..."
@@ -135,13 +141,10 @@ export default function App() {
               isDarkMode={isDarkMode}
               error={validationErrors['summary']}
             />
-          </View>
+          </SectionCard>
 
-          {/* Form Card: Core Skills */}
-          <View style={[styles.glassCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>
-              Technical Skills
-            </Text>
+          {/* Section: Skills */}
+          <SectionCard title="Technical Skills" theme={theme}>
             <GlassInput
               label="Skills (Comma Separated)"
               value={activeSkillsText}
@@ -151,39 +154,83 @@ export default function App() {
               isDarkMode={isDarkMode}
               error={validationErrors['skills']}
             />
-          </View>
+          </SectionCard>
 
-          {/* Work Experience Preview (Prefilled items from image.png) */}
-          <View style={[styles.glassCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-            <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>
-              Work Experience ({cvData.workExperience.length} items)
-            </Text>
-            {cvData.workExperience.map((exp, idx) => {
-              const isLast = idx === cvData.workExperience.length - 1;
-              return (
-                <View
-                  key={`exp-${idx}`}
-                  style={[
-                    styles.experienceItem,
-                    { borderBottomColor: theme.cardBorder },
-                    isLast ? { borderBottomWidth: 0 } : null,
-                  ]}
-                >
-                  <Text style={[styles.expTitle, { color: theme.textPrimary }]}>
-                    {exp.jobTitle}
-                  </Text>
-                  <Text style={[styles.expDetails, { color: theme.textSecondary }]}>
-                    {exp.companyLocation} | {exp.dateRange}
-                  </Text>
-                  <Text style={[styles.expTasks, { color: theme.textBody }]}>
-                    Tasks: {exp.mainTasks.length} bullet points loaded
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
+          {/* Section: Work Experience Preview */}
+          <SectionCard title={`Work Experience (${cvData.workExperience.length} items)`} theme={theme}>
+            <ExperiencePreview workExperience={cvData.workExperience} theme={theme} />
+          </SectionCard>
 
-          {/* Action Trigger Button */}
+          {/* Section: Education Details */}
+          <SectionCard title="Education" theme={theme}>
+            <GlassInput
+              label="Degree Title"
+              value={cvData.education[0]?.degree || ''}
+              onChangeText={(val: string) => handleUpdateEducation('degree', val)}
+              placeholder="e.g. Bachelors of electromechanical Engineering"
+              isDarkMode={isDarkMode}
+              error={validationErrors['education.0.degree']}
+            />
+            <GlassInput
+              label="Institution Name"
+              value={cvData.education[0]?.institution || ''}
+              onChangeText={(val: string) => handleUpdateEducation('institution', val)}
+              placeholder="e.g. Southern Technical University"
+              isDarkMode={isDarkMode}
+              error={validationErrors['education.0.institution']}
+            />
+            <GlassInput
+              label="Graduation Year"
+              value={cvData.education[0]?.year || ''}
+              onChangeText={(val: string) => handleUpdateEducation('year', val)}
+              placeholder="e.g. 2025"
+              isDarkMode={isDarkMode}
+              error={validationErrors['education.0.year']}
+            />
+            <GlassInput
+              label="Academic Honors Notes"
+              value={cvData.education[0]?.notes || ''}
+              onChangeText={(val: string) => handleUpdateEducation('notes', val)}
+              placeholder="e.g. Achieved top-tier standing..."
+              isDarkMode={isDarkMode}
+              error={validationErrors['education.0.notes']}
+            />
+          </SectionCard>
+
+          {/* Section: Courses */}
+          <SectionCard title="Training & Courses" theme={theme}>
+            <GlassInput
+              label="Courses (Comma Separated)"
+              value={activeCoursesText}
+              onChangeText={updateCoursesString}
+              placeholder="e.g. HVAC, NEBOSH Complete Course"
+              multiline
+              isDarkMode={isDarkMode}
+              error={validationErrors['courses']}
+            />
+          </SectionCard>
+
+          {/* Section: Languages */}
+          <SectionCard title="Languages" theme={theme}>
+            <GlassInput
+              label="Arabic Level"
+              value={cvData.languages[0]?.level || ''}
+              onChangeText={(val: string) => handleUpdateLanguage(0, val)}
+              placeholder="e.g. Native language"
+              isDarkMode={isDarkMode}
+              error={validationErrors['languages.0.level']}
+            />
+            <GlassInput
+              label="English Level"
+              value={cvData.languages[1]?.level || ''}
+              onChangeText={(val: string) => handleUpdateLanguage(1, val)}
+              placeholder="e.g. Reading, writing and speaking"
+              isDarkMode={isDarkMode}
+              error={validationErrors['languages.1.level']}
+            />
+          </SectionCard>
+
+          {/* Main Action Trigger */}
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: theme.buttonBackground }]}
             activeOpacity={0.85}
@@ -210,72 +257,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: SPACING.md,
     paddingBottom: SPACING.xl,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-    marginTop: Platform.OS === 'android' ? SPACING.md : 0,
-  },
-  appTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  appSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  themeToggle: {
-    borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.sm + 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  themeToggleText: {
-    fontSize: TYPOGRAPHY.fontSize.xs - 2,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  glassCard: {
-    borderRadius: BORDER_RADIUS.xl,
-    borderWidth: 1,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  sectionHeading: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: '800',
-    marginBottom: SPACING.md,
-    textTransform: 'capitalize',
-    letterSpacing: 0.5,
-  },
-  experienceItem: {
-    paddingVertical: SPACING.sm,
-    borderBottomWidth: 1,
-  },
-  expTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm + 1,
-    fontWeight: '700',
-  },
-  expDetails: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  expTasks: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: '500',
-    marginTop: 4,
   },
   primaryButton: {
     borderRadius: BORDER_RADIUS.lg,
