@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -8,13 +8,15 @@ import {
   Platform,
   Modal,
   ActionSheetIOS,
+  ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Cairo_400Regular, Cairo_700Bold, Cairo_900Black } from '@expo-google-fonts/cairo';
-import { COLORS, getFontFamily, SPACING } from './src/constants/tokens';
+import { COLORS, getFontFamily, SPACING, BORDER_RADIUS } from './src/constants/tokens';
 import { translations } from './src/constants/translations';
 import { useCV } from './src/hooks/useCV';
 import { GlassInput } from './src/components/GlassInput';
@@ -44,6 +46,32 @@ function AppContent() {
   const t = translations[activeLanguage];
   const theme = isDarkMode ? COLORS.app.dark : COLORS.app.light;
 
+  const snackOpacity = useRef(new Animated.Value(0)).current;
+  const snackTranslateY = useRef(new Animated.Value(50)).current;
+  const snackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [snackMessage, setSnackMessage] = useState<string | null>(null);
+
+  const showSnack = useCallback((msg: string) => {
+    setSnackMessage(msg);
+    snackOpacity.setValue(0);
+    snackTranslateY.setValue(50);
+
+    Animated.parallel([
+      Animated.timing(snackOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(snackTranslateY, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start();
+
+    if (snackTimer.current) clearTimeout(snackTimer.current);
+    snackTimer.current = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(snackOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(snackTranslateY, { toValue: 50, duration: 300, useNativeDriver: true }),
+      ]).start(() => {
+        setSnackMessage(null);
+      });
+    }, 3500);
+  }, []);
+
   const {
     cvData,
     updateField,
@@ -55,10 +83,94 @@ function AppContent() {
     addWorkExperience,
     removeWorkExperience,
     validationErrors,
+    setValidationErrors,
     isLoading,
     systemError,
     handleGeneratePDF,
+    exportStatus,
+    resetExportStatus,
   } = useCV();
+
+  const cvDataKey = JSON.stringify(cvData);
+  const prevCvDataKey = useRef(cvDataKey);
+
+  useEffect(() => {
+    if (prevCvDataKey.current !== cvDataKey && exportStatus === 'completed') {
+      resetExportStatus();
+    }
+    prevCvDataKey.current = cvDataKey;
+  }, [cvDataKey, exportStatus, resetExportStatus]);
+
+  const v = t.validation;
+
+  const validateStep = (step: number): boolean => {
+    const errors: Record<string, string> = {};
+    let global: string | null = null;
+
+    if (step === 0) {
+      if (!cvData.fullName.trim()) errors.fullName = v.required;
+      if (!cvData.address.trim()) errors.address = v.required;
+      if (!cvData.phone.trim()) errors.phone = v.required;
+      if (!cvData.email.trim()) {
+        errors.email = v.required;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cvData.email)) {
+        errors.email = v.invalidEmail;
+      }
+      if (cvData.summary.trim().length < 20) errors.summary = v.summaryLength;
+    }
+
+    if (step === 1) {
+      const validEntries = cvData.workExperience.filter(e => e.jobTitle.trim().length > 0);
+      if (validEntries.length === 0) global = v.workExperienceRequired;
+    }
+
+    if (step === 2) {
+      const validEducation = cvData.education.filter(e => e.degree.trim().length > 0);
+      if (validEducation.length === 0) global = v.educationRequired;
+    }
+
+    if (global) showSnack(global);
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0 && !global;
+  };
+
+  const validateAll = (): boolean => {
+    const errors: Record<string, string> = {};
+    let global: string | null = null;
+
+    if (!cvData.fullName.trim()) errors.fullName = v.required;
+    if (!cvData.address.trim()) errors.address = v.required;
+    if (!cvData.phone.trim()) errors.phone = v.required;
+    if (!cvData.email.trim()) {
+      errors.email = v.required;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cvData.email)) {
+      errors.email = v.invalidEmail;
+    }
+    if (cvData.summary.trim().length < 20) errors.summary = v.summaryLength;
+
+    const validEntries = cvData.workExperience.filter(e => e.jobTitle.trim().length > 0);
+    if (validEntries.length === 0) global = v.workExperienceRequired;
+
+    const validEducation = cvData.education.filter(e => e.degree.trim().length > 0);
+    if (validEducation.length === 0 && !global) global = v.educationRequired;
+
+    if (global) showSnack(global);
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0 && !global;
+  };
+
+  const handleNext = () => {
+    setSnackMessage(null);
+    if (validateStep(activeStep)) {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+
+  const handleExportAction = async () => {
+    setSnackMessage(null);
+    if (!validateAll()) return;
+    await handleGeneratePDF(isDarkMode, pdfLang);
+  };
 
   if (showSplash || !fontsLoaded) {
     return <Splash onFinish={() => setShowSplash(false)} />;
@@ -139,7 +251,7 @@ function AppContent() {
                   key={stepIdx}
                   style={[
                     styles.stepIndicator,
-                    { backgroundColor: stepIdx <= activeStep ? theme.textPrimary : theme.borderMuted },
+                    { backgroundColor: stepIdx <= activeStep ? theme.accent : (isDarkMode ? '#2C2C2E' : '#E5E5EA') },
                   ]}
                 />
               ))}
@@ -422,6 +534,36 @@ function AppContent() {
                 />
               </SectionCard>
 
+              <SectionCard title="Export PDF" theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
+                {exportStatus === 'idle' && (
+                  <TouchableOpacity
+                    style={[styles.primaryButton, { backgroundColor: theme.buttonBackground }]}
+                    activeOpacity={0.85}
+                    onPress={handleExportAction}
+                  >
+                    <Text style={[styles.primaryButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
+                      {t.buttons.export}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {exportStatus === 'generating' && (
+                  <View style={[styles.primaryButton, { backgroundColor: theme.buttonBackground, flexDirection: 'row', gap: SPACING.sm }]}>
+                    <ActivityIndicator size="small" color={theme.buttonText} />
+                    <Text style={[styles.primaryButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
+                      {t.buttons.generating}
+                    </Text>
+                  </View>
+                )}
+                {exportStatus === 'completed' && (
+                  <View style={[styles.primaryButton, { backgroundColor: theme.success, flexDirection: 'row', gap: SPACING.sm }]}>
+                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                    <Text style={[styles.primaryButtonText, { color: '#FFFFFF', fontFamily: getFontFamily(isRTL, 800) }]}>
+                      {t.buttons.completed}
+                    </Text>
+                  </View>
+                )}
+              </SectionCard>
+
             </View>
           )}
 
@@ -442,28 +584,36 @@ function AppContent() {
         }}
       >
         {activeStep > 0 && (
-          <TouchableOpacity
+          <BlurView
+            intensity={80}
+            tint={isDarkMode ? 'dark' : 'light'}
             style={{
-              width: FAB_SIZE,
-              height: FAB_SIZE,
+              width: 50,
+              height: 50,
               borderRadius: 9999,
-              backgroundColor: theme.borderMuted,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 4,
+              overflow: 'hidden',
             }}
-            activeOpacity={0.7}
-            onPress={() => setActiveStep((prev) => prev - 1)}
           >
-            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={theme.textSecondary} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                width: 50,
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              activeOpacity={0.7}
+              onPress={() => {
+                setActiveStep((prev) => prev - 1);
+                setSnackMessage(null);
+                setValidationErrors({});
+              }}
+            >
+              <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={22} color={theme.textSecondary} />
+            </TouchableOpacity>
+          </BlurView>
         )}
         <View style={{ flex: 1 }} />
-        {activeStep < 3 ? (
+        {activeStep < 3 && (
           <TouchableOpacity
             style={{
               width: FAB_SIZE,
@@ -479,33 +629,54 @@ function AppContent() {
               elevation: 4,
             }}
             activeOpacity={0.7}
-            onPress={() => setActiveStep((prev) => prev + 1)}
+            onPress={handleNext}
           >
             <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={24} color={theme.buttonText} />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={{
-              width: FAB_SIZE,
-              height: FAB_SIZE,
-              borderRadius: 9999,
-              backgroundColor: theme.buttonBackground,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 4,
-            }}
-            activeOpacity={0.7}
-            onPress={() => handleGeneratePDF(isDarkMode, pdfLang)}
-            disabled={isLoading}
-          >
-            <Ionicons name="share-outline" size={24} color={theme.buttonText} />
-          </TouchableOpacity>
         )}
       </View>
+
+      {/* Floating Snackbar — Validation Error Pill */}
+      {snackMessage && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: insets.bottom + 90,
+            left: SPACING.lg,
+            right: SPACING.lg,
+            backgroundColor: theme.error,
+            borderRadius: 9999,
+            paddingVertical: SPACING.sm + 2,
+            paddingHorizontal: SPACING.lg,
+            flexDirection: isRTL ? 'row-reverse' : 'row',
+            alignItems: 'center',
+            gap: SPACING.sm,
+            zIndex: 60,
+            opacity: snackOpacity,
+            transform: [{ translateY: snackTranslateY }],
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            elevation: 6,
+          }}
+          pointerEvents="none"
+        >
+          <Ionicons name="alert-circle" size={18} color="#FFFFFF" />
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontSize: 14,
+              fontWeight: '600',
+              flex: 1,
+              fontFamily: getFontFamily(isRTL, 600),
+            }}
+            numberOfLines={1}
+          >
+            {snackMessage}
+          </Text>
+        </Animated.View>
+      )}
 
       {/* Settings Modal */}
       <Modal
@@ -525,14 +696,24 @@ function AppContent() {
               { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
             ]}
           >
-            <Text style={[styles.sheetTitle, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 800) }]}>
+            <Text
+              style={[styles.sheetTitle, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 800) }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
+            >
               {t.preferences.title}
             </Text>
             <TouchableOpacity
               style={[styles.sheetButton, { backgroundColor: theme.inputBackground }]}
               onPress={() => setIsDarkMode((prev) => !prev)}
             >
-              <Text style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}>
+              <Text
+                style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
+              >
                 {t.preferences.toggleTheme}
               </Text>
             </TouchableOpacity>
@@ -544,7 +725,12 @@ function AppContent() {
                 setPdfLang(nextLang);
               }}
             >
-              <Text style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}>
+              <Text
+                style={[styles.sheetButtonText, { color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
+              >
                 {isRTL ? t.preferences.pdfLangAr : t.preferences.pdfLang}
               </Text>
             </TouchableOpacity>
@@ -552,7 +738,12 @@ function AppContent() {
               style={[styles.cancelButton, { backgroundColor: theme.buttonBackground }]}
               onPress={() => setIsSettingsVisible(false)}
             >
-              <Text style={[styles.cancelButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
+              <Text
+                style={[styles.cancelButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
+              >
                 {t.buttons.close}
               </Text>
             </TouchableOpacity>

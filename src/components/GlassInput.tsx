@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, getFontFamily } from '../constants/tokens';
 
 interface GlassInputProps extends TextInputProps {
@@ -54,12 +55,15 @@ export const GlassInput = ({
         />
       </View>
       {error && (
-        <Text style={[
-          styles.errorText,
-          { color: theme.error, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 400) }
-        ]}>
-          {error}
-        </Text>
+        <View style={[styles.errorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <Ionicons name="alert-circle" size={14} color={theme.error} />
+          <Text style={[
+            styles.errorText,
+            { color: theme.error, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 400) }
+          ]}>
+            {error}
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -101,10 +105,15 @@ const styles = StyleSheet.create({
   inputMultiline: {
     minHeight: 60,
   },
+  errorRow: {
+    alignItems: 'center',
+    gap: 4,
+    marginTop: SPACING.xs,
+    paddingLeft: SPACING.xs,
+  },
   errorText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: '500',
-    marginTop: SPACING.xs,
-    paddingLeft: SPACING.xs,
+    flexShrink: 1,
   },
 });

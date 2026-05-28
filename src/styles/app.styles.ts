@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/tokens';
 
-export const FLOATING_HEADER_HEIGHT = 92;
+export const FLOATING_HEADER_HEIGHT = 110;
 
 export const styles = StyleSheet.create({
   root: {
@@ -18,6 +18,8 @@ export const styles = StyleSheet.create({
   },
   floatingBlur: {
     overflow: 'hidden',
+    borderBottomLeftRadius: BORDER_RADIUS.xl,
+    borderBottomRightRadius: BORDER_RADIUS.xl,
   },
   scrollContent: {
     paddingHorizontal: SPACING.md,
@@ -107,36 +109,49 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
     borderBottomWidth: 0,
-    padding: SPACING.lg,
+    paddingTop: SPACING.lg,
     paddingBottom: SPACING.xl,
-    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    // Do NOT use alignItems: 'center' — it collapses children widths
+    // and prevents adjustsFontSizeToFit from having a boundary to measure.
+    alignItems: 'stretch',
   },
   sheetTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: '800',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     marginBottom: SPACING.md,
+    // width: '100%' ensures adjustsFontSizeToFit has a bounded box to shrink into.
+    width: '100%',
+    textAlign: 'center',
   },
   sheetButton: {
     width: '100%',
     borderRadius: BORDER_RADIUS.lg,
     paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
     marginBottom: SPACING.sm,
   },
   sheetButtonText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: '700',
+    // width: '100%' gives adjustsFontSizeToFit a definite boundary.
+    width: '100%',
+    textAlign: 'center',
   },
   cancelButton: {
     width: '100%',
     borderRadius: BORDER_RADIUS.xl,
     paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
     marginTop: SPACING.md,
   },
   cancelButtonText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: '800',
+    width: '100%',
+    textAlign: 'center',
   },
 });

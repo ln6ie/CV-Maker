@@ -10,6 +10,7 @@ export const useCV = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [systemError, setSystemError] = useState<string | null>(null);
+  const [exportStatus, setExportStatus] = useState<'idle' | 'generating' | 'completed'>('idle');
 
   const updateField = (field: keyof CVData, value: any) => {
     setCvData((prev) => ({
@@ -97,6 +98,7 @@ export const useCV = () => {
   };
 
   const handleGeneratePDF = async (isDarkMode: boolean, lang: 'en' | 'ar' = 'en') => {
+    setExportStatus('generating');
     setIsLoading(true);
     setSystemError(null);
     setValidationErrors({});
@@ -112,6 +114,7 @@ export const useCV = () => {
         });
         setValidationErrors(errors);
         setSystemError('Validation failed. Please check the marked fields.');
+        setExportStatus('idle');
         setIsLoading(false);
         return;
       }
@@ -126,12 +129,17 @@ export const useCV = () => {
       } else {
         setSystemError('Sharing is not available on this platform. PDF saved locally.');
       }
+
+      setExportStatus('completed');
     } catch (err: any) {
       setSystemError(err?.message || 'An unexpected error occurred during PDF compilation.');
+      setExportStatus('idle');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const resetExportStatus = () => setExportStatus('idle');
 
   return {
     cvData,
@@ -144,9 +152,12 @@ export const useCV = () => {
     addWorkExperience,
     removeWorkExperience,
     validationErrors,
+    setValidationErrors,
     isLoading,
     systemError,
     setSystemError,
     handleGeneratePDF,
+    exportStatus,
+    resetExportStatus,
   };
 };

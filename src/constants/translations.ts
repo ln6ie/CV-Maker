@@ -34,6 +34,7 @@ export interface TranslationSet {
     next: string;
     export: string;
     generating: string;
+    completed: string;
     close: string;
   };
   actionSheet: {
@@ -52,6 +53,13 @@ export interface TranslationSet {
     generating: string;
     validationError: string;
     noData: string;
+  };
+  validation: {
+    required: string;
+    invalidEmail: string;
+    summaryLength: string;
+    workExperienceRequired: string;
+    educationRequired: string;
   };
 }
 
@@ -94,6 +102,7 @@ export const translations: Record<Language, TranslationSet> = {
       next: 'NEXT',
       export: 'COMPILE & EXPORT PDF',
       generating: 'GENERATING...',
+      completed: 'Completed',
       close: 'CLOSE',
     },
     actionSheet: {
@@ -112,6 +121,13 @@ export const translations: Record<Language, TranslationSet> = {
       generating: 'Generating PDF...',
       validationError: 'Validation Error',
       noData: 'No Data Found',
+    },
+    validation: {
+      required: 'This field is required',
+      invalidEmail: 'Invalid email format',
+      summaryLength: 'Please write a brief summary (at least 20 characters)',
+      workExperienceRequired: 'Please add at least one valid Work Experience entry',
+      educationRequired: 'Please add at least one valid Education entry',
     },
   },
   ar: {
@@ -150,6 +166,7 @@ export const translations: Record<Language, TranslationSet> = {
       next: 'التالي',
       export: 'تصدير بصيغة PDF',
       generating: 'جارٍ التصدير...',
+      completed: 'تم',
       close: 'إغلاق',
     },
     actionSheet: {
@@ -168,6 +185,13 @@ export const translations: Record<Language, TranslationSet> = {
       generating: 'جارٍ إنشاء PDF...',
       validationError: 'خطأ في التحقق',
       noData: 'لا توجد بيانات',
+    },
+    validation: {
+      required: 'هذا الحقل مطلوب',
+      invalidEmail: 'تنسيق البريد الإلكتروني غير صحيح',
+      summaryLength: 'يرجى كتابة ملخص لا يقل عن 20 حرفًا',
+      workExperienceRequired: 'يرجى إضافة خبرة مهنية واحدة على الأقل',
+      educationRequired: 'يرجى إضافة مؤهل تعليمي واحد على الأقل',
     },
   },
 };
