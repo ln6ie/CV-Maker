@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": [
+      "es2015",
+      "es2016",
+      "es2017",
+      "es2018",
+      "es2019",
+      "es2020",
+      "esnext"
+    ],
+    "allowJs": true,
+    "jsx": "react-native",
+    "noEmit": true,
+    "strict": true,
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
+  "extends": "expo/tsconfig.base"
+}

@@ -1,0 +1,5 @@
+allowBuilds:
+  msgpackr-extract: set this to true or false
+minimumReleaseAgeExclude:
+  - expo-modules-autolinking@56.0.14
+  - expo@56.0.6
