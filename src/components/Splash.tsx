@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, Text, StyleSheet, StatusBar } from 'react-native';
+import { Animated, Text, StyleSheet, StatusBar } from 'react-native';
 
 interface SplashProps {
   onFinish: () => void;
@@ -11,25 +11,33 @@ export const Splash = ({ onFinish }: SplashProps) => {
   const fadeOut = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }),
-      Animated.timing(fadeIn, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      Animated.timing(fadeOut, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(onFinish);
-    });
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeIn, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(2000),
+      Animated.parallel([
+        Animated.timing(scale, {
+          toValue: 1.05,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeOut, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start(onFinish);
   }, []);
 
   return (
@@ -37,14 +45,12 @@ export const Splash = ({ onFinish }: SplashProps) => {
       <StatusBar barStyle="light-content" />
       <Animated.View
         style={[
-          styles.logoContainer,
+          styles.container,
           { opacity: fadeIn, transform: [{ scale }] },
         ]}
       >
-        <View style={styles.logoBox}>
-          <Text style={styles.logoText}>CV</Text>
-        </View>
-        <Text style={styles.sub}>A4 PROFESSIONAL BUILDER</Text>
+        <Text style={styles.logo}>Raqeem</Text>
+        <Text style={styles.sub}>Professional CV Builder</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -57,27 +63,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoContainer: {
+  container: {
     alignItems: 'center',
   },
-  logoBox: {
-    backgroundColor: '#002060',
-    width: 90,
-    height: 90,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#002060',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-  logoText: {
-    color: '#FFFFFF',
-    fontSize: 38,
+  logo: {
+    color: '#007AFF',
+    fontSize: 56,
     fontWeight: '900',
-    letterSpacing: -1,
+    letterSpacing: -1.5,
   },
   sub: {
     color: '#8E8E93',

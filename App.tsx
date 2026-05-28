@@ -8,15 +8,16 @@ import {
   Platform,
   Modal,
   ActionSheetIOS,
-  ActivityIndicator,
   Animated,
+  useColorScheme,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Cairo_400Regular, Cairo_700Bold, Cairo_900Black } from '@expo-google-fonts/cairo';
-import { COLORS, getFontFamily, SPACING, BORDER_RADIUS } from './src/constants/tokens';
+import { COLORS, getFontFamily, SPACING } from './src/constants/tokens';
 import { translations } from './src/constants/translations';
 import { useCV } from './src/hooks/useCV';
 import { GlassInput } from './src/components/GlassInput';
@@ -24,6 +25,7 @@ import { StatusBanner } from './src/components/StatusBanner';
 import { Header } from './src/components/Header';
 import { SectionCard } from './src/components/SectionCard';
 import { Splash } from './src/components/Splash';
+import { ExportButton } from './src/components/ExportButton';
 import { Education } from './src/types/cv';
 import { styles, FLOATING_HEADER_HEIGHT } from './src/styles/app.styles';
 
@@ -35,6 +37,31 @@ function AppContent() {
   const [pdfLang, setPdfLang] = useState<'en' | 'ar'>('en');
   const [activeLanguage, setActiveLanguage] = useState<'en' | 'ar'>('en');
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+  const systemScheme = useColorScheme();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem('@Raqeem_Theme');
+        if (stored !== null) {
+          setIsDarkMode(stored === 'dark');
+        } else {
+          setIsDarkMode(systemScheme === 'dark');
+        }
+      } catch {
+        setIsDarkMode(systemScheme === 'dark');
+      }
+      setThemeLoaded(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (themeLoaded) {
+      AsyncStorage.setItem('@Raqeem_Theme', isDarkMode ? 'dark' : 'light');
+    }
+  }, [isDarkMode, themeLoaded]);
 
   const [fontsLoaded] = useFonts({
     'Cairo': Cairo_400Regular,
@@ -87,19 +114,9 @@ function AppContent() {
     isLoading,
     systemError,
     handleGeneratePDF,
+    handleReShare,
     exportStatus,
-    resetExportStatus,
   } = useCV();
-
-  const cvDataKey = JSON.stringify(cvData);
-  const prevCvDataKey = useRef(cvDataKey);
-
-  useEffect(() => {
-    if (prevCvDataKey.current !== cvDataKey && exportStatus === 'completed') {
-      resetExportStatus();
-    }
-    prevCvDataKey.current = cvDataKey;
-  }, [cvDataKey, exportStatus, resetExportStatus]);
 
   const v = t.validation;
 
@@ -172,7 +189,7 @@ function AppContent() {
     await handleGeneratePDF(isDarkMode, pdfLang);
   };
 
-  if (showSplash || !fontsLoaded) {
+  if (showSplash || !fontsLoaded || !themeLoaded) {
     return <Splash onFinish={() => setShowSplash(false)} />;
   }
 
@@ -535,33 +552,14 @@ function AppContent() {
               </SectionCard>
 
               <SectionCard title="Export PDF" theme={theme} isRTL={isRTL} isDarkMode={isDarkMode}>
-                {exportStatus === 'idle' && (
-                  <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: theme.buttonBackground }]}
-                    activeOpacity={0.85}
-                    onPress={handleExportAction}
-                  >
-                    <Text style={[styles.primaryButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
-                      {t.buttons.export}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                {exportStatus === 'generating' && (
-                  <View style={[styles.primaryButton, { backgroundColor: theme.buttonBackground, flexDirection: 'row', gap: SPACING.sm }]}>
-                    <ActivityIndicator size="small" color={theme.buttonText} />
-                    <Text style={[styles.primaryButtonText, { color: theme.buttonText, fontFamily: getFontFamily(isRTL, 800) }]}>
-                      {t.buttons.generating}
-                    </Text>
-                  </View>
-                )}
-                {exportStatus === 'completed' && (
-                  <View style={[styles.primaryButton, { backgroundColor: theme.success, flexDirection: 'row', gap: SPACING.sm }]}>
-                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                    <Text style={[styles.primaryButtonText, { color: '#FFFFFF', fontFamily: getFontFamily(isRTL, 800) }]}>
-                      {t.buttons.completed}
-                    </Text>
-                  </View>
-                )}
+                <ExportButton
+                  theme={theme}
+                  isRTL={isRTL}
+                  t={t}
+                  exportStatus={exportStatus}
+                  onPress={handleExportAction}
+                  onReShare={handleReShare}
+                />
               </SectionCard>
 
             </View>
@@ -584,33 +582,29 @@ function AppContent() {
         }}
       >
         {activeStep > 0 && (
-          <BlurView
-            intensity={80}
-            tint={isDarkMode ? 'dark' : 'light'}
+          <TouchableOpacity
             style={{
-              width: 50,
-              height: 50,
+              width: FAB_SIZE,
+              height: FAB_SIZE,
               borderRadius: 9999,
-              overflow: 'hidden',
+              backgroundColor: theme.buttonBackground,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            activeOpacity={0.7}
+            onPress={() => {
+              setActiveStep((prev) => prev - 1);
+              setSnackMessage(null);
+              setValidationErrors({});
             }}
           >
-            <TouchableOpacity
-              style={{
-                width: 50,
-                height: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-              onPress={() => {
-                setActiveStep((prev) => prev - 1);
-                setSnackMessage(null);
-                setValidationErrors({});
-              }}
-            >
-              <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={22} color={theme.textSecondary} />
-            </TouchableOpacity>
-          </BlurView>
+            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={theme.buttonText} />
+          </TouchableOpacity>
         )}
         <View style={{ flex: 1 }} />
         {activeStep < 3 && (

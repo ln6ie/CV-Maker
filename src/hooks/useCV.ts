@@ -11,6 +11,12 @@ export const useCV = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [systemError, setSystemError] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState<'idle' | 'generating' | 'completed'>('idle');
+  const [cachedPdfUri, setCachedPdfUri] = useState<string | null>(null);
+
+  const clearExportCache = () => {
+    setCachedPdfUri(null);
+    setExportStatus('idle');
+  };
 
   const updateField = (field: keyof CVData, value: any) => {
     setCvData((prev) => ({
@@ -24,6 +30,7 @@ export const useCV = () => {
         return copy;
       });
     }
+    clearExportCache();
   };
 
   const updateSkillsString = (skillsStr: string) => {
@@ -50,6 +57,7 @@ export const useCV = () => {
       }
       return { ...prev, workExperience: list };
     });
+    clearExportCache();
   };
 
   const updateWorkExperienceTask = (expIndex: number, taskIndex: number, value: string) => {
@@ -62,6 +70,7 @@ export const useCV = () => {
       }
       return { ...prev, workExperience: list };
     });
+    clearExportCache();
   };
 
   const addWorkExperienceTask = (expIndex: number) => {
@@ -75,6 +84,7 @@ export const useCV = () => {
       }
       return { ...prev, workExperience: list };
     });
+    clearExportCache();
   };
 
   const addWorkExperience = () => {
@@ -88,6 +98,7 @@ export const useCV = () => {
       ...prev,
       workExperience: [...prev.workExperience, empty],
     }));
+    clearExportCache();
   };
 
   const removeWorkExperience = (index: number) => {
@@ -95,6 +106,7 @@ export const useCV = () => {
       ...prev,
       workExperience: prev.workExperience.filter((_, i) => i !== index),
     }));
+    clearExportCache();
   };
 
   const handleGeneratePDF = async (isDarkMode: boolean, lang: 'en' | 'ar' = 'en') => {
@@ -123,6 +135,8 @@ export const useCV = () => {
 
       const { uri } = await Print.printToFileAsync({ html });
 
+      setCachedPdfUri(uri);
+
       const isSharingAvailable = await Sharing.isAvailableAsync();
       if (isSharingAvailable) {
         await Sharing.shareAsync(uri);
@@ -139,7 +153,19 @@ export const useCV = () => {
     }
   };
 
-  const resetExportStatus = () => setExportStatus('idle');
+  const handleReShare = async () => {
+    if (!cachedPdfUri) return;
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(cachedPdfUri);
+      } else {
+        setSystemError('Sharing is not available on this platform.');
+      }
+    } catch (err: any) {
+      setSystemError(err?.message || 'Sharing failed.');
+    }
+  };
 
   return {
     cvData,
@@ -157,7 +183,8 @@ export const useCV = () => {
     systemError,
     setSystemError,
     handleGeneratePDF,
+    handleReShare,
     exportStatus,
-    resetExportStatus,
+    cachedPdfUri,
   };
 };

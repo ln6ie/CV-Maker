@@ -35,6 +35,7 @@ export interface TranslationSet {
     export: string;
     generating: string;
     completed: string;
+    shareAgain: string;
     close: string;
   };
   actionSheet: {
@@ -68,12 +69,12 @@ export type Language = 'en' | 'ar';
 export const translations: Record<Language, TranslationSet> = {
   en: {
     app: {
-      title: 'CV BUILDER',
-      subtitle: 'A4 PDF Creator',
+      title: 'Raqeem CV',
+      subtitle: 'Professional CV Builder',
     },
     splash: {
-      logo: 'CV',
-      subtitle: 'A4 PROFESSIONAL BUILDER',
+      logo: 'Raqeem',
+      subtitle: 'Professional CV Builder',
     },
     steps: {
       personal: 'Personal Details',
@@ -103,6 +104,7 @@ export const translations: Record<Language, TranslationSet> = {
       export: 'COMPILE & EXPORT PDF',
       generating: 'GENERATING...',
       completed: 'Completed',
+      shareAgain: 'SHARE AGAIN',
       close: 'CLOSE',
     },
     actionSheet: {
@@ -132,12 +134,12 @@ export const translations: Record<Language, TranslationSet> = {
   },
   ar: {
     app: {
-      title: 'منشئ السيرة الذاتية',
-      subtitle: 'منشئ PDF بصيغة A4',
+      title: 'رَقيم CV',
+      subtitle: 'منشئ السيرة الذاتية الاحترافي',
     },
     splash: {
-      logo: 'السيرة',
-      subtitle: 'منشئ احترافي بصيغة A4',
+      logo: 'رَقيم',
+      subtitle: 'منشئ السيرة الذاتية الاحترافي',
     },
     steps: {
       personal: 'البيانات الشخصية',
@@ -167,6 +169,7 @@ export const translations: Record<Language, TranslationSet> = {
       export: 'تصدير بصيغة PDF',
       generating: 'جارٍ التصدير...',
       completed: 'تم',
+      shareAgain: 'إعادة المشاركة',
       close: 'إغلاق',
     },
     actionSheet: {

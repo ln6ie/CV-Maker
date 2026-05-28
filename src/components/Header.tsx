@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SPACING, BORDER_RADIUS, TYPOGRAPHY, getFontFamily } from '../constants/tokens';
+import { SPACING, BORDER_RADIUS } from '../constants/tokens';
 import { TranslationSet } from '../constants/translations';
 
 interface HeaderProps {
@@ -20,18 +20,16 @@ export const Header = ({ isDarkMode, onOpenSettings, theme, isRTL, t }: HeaderPr
         { flexDirection: isRTL ? 'row-reverse' : 'row' },
       ]}
     >
-      {/* Minimalist Logo Mark */}
-      <View style={styles.logoMark}>
-        <View style={[styles.logoBox, { backgroundColor: theme.buttonBackground }]}>
-          <Text style={[styles.logoText, { color: theme.buttonText }]}>CV</Text>
-        </View>
-        <Text style={[
-          styles.logoCaption,
-          { color: theme.textSecondary, fontFamily: getFontFamily(isRTL, 700) }
-        ]}>
-          {t.app.subtitle}
-        </Text>
-      </View>
+      <Text
+        style={{
+          color: theme.buttonBackground,
+          fontSize: 22,
+          fontWeight: '800',
+          letterSpacing: -0.5,
+        }}
+      >
+        {t.app.title}
+      </Text>
 
       <TouchableOpacity
         onPress={onOpenSettings}
@@ -54,29 +52,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: Platform.OS === 'android' ? SPACING.md : SPACING.sm,
     paddingBottom: SPACING.md,
-  },
-  logoMark: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  logoBox: {
-    width: 36,
-    height: 36,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
-  logoCaption: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   settingsButton: {
     borderRadius: BORDER_RADIUS.full,

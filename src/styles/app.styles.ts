@@ -42,39 +42,7 @@ export const styles = StyleSheet.create({
     height: 4,
     borderRadius: BORDER_RADIUS.sm,
   },
-  navRow: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginTop: SPACING.md,
-  },
-  navButton: {
-    borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.lg,
-  },
-  navButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  primaryButton: {
-    borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: SPACING.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  primaryButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
+
   experienceSubCard: {
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
