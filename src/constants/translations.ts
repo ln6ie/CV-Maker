@@ -119,8 +119,8 @@ export const translations: Record<Language, TranslationSet> = {
     },
     placeholders: {
       fullName: 'e.g. Abdullah Karim Hussein',
-      address: 'e.g. Tanuma, Basra, Iraq',
-      phone: 'e.g. 07729375972',
+      address: 'e.g. Basra, Iraq',
+      phone: 'e.g. 077xxxxxxxx',
       email: 'e.g. info@domain.com',
       summary: 'Describe your professional experience and objectives...',
       degree: 'e.g. Bachelors of Electromechanical Engineering',
@@ -203,8 +203,8 @@ export const translations: Record<Language, TranslationSet> = {
     },
     placeholders: {
       fullName: 'مثال: عبدالله كريم حسين',
-      address: 'مثال: شارع التنومة - البصرة - العراق',
-      phone: 'مثال: 0772xxxxxxx',
+      address: 'مثال: البصرة - العراق',
+      phone: 'مثال: 077xxxxxxxx',
       email: 'مثال: name@gmail.com',
       summary: 'اكتب ملخصاً جذاباً لخبراتك وقدراتك وأهدافك المهنية...',
       degree: 'مثال: بكالوريوس هندسة كهروميكانيكية',
