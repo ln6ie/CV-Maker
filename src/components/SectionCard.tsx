@@ -2,13 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SPACING, BORDER_RADIUS, TYPOGRAPHY, getFontFamily } from '../constants/tokens';
 
-interface SectionCardProps {
-  title: string;
-  theme: any;
-  children: React.ReactNode;
-  isRTL?: boolean;
-  isDarkMode?: boolean;
-}
+import { SectionCardProps } from '../types/components';
 
 export const SectionCard = ({ title, theme, children, isRTL = false, isDarkMode = false }: SectionCardProps) => {
   return (

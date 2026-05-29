@@ -1,14 +1,9 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, getFontFamily } from '../constants/tokens';
-
-interface GlassInputProps extends TextInputProps {
-  label: string;
-  isDarkMode: boolean;
-  error?: string;
-  isRTL?: boolean;
-}
+import { LargeTextEditorSheet } from './LargeTextEditorSheet';
+import { GlassInputProps } from '../types/components';
 
 export const GlassInput = ({
   label,
@@ -18,9 +13,88 @@ export const GlassInput = ({
   style,
   multiline,
   numberOfLines,
+  value = '',
+  onChangeText,
+  placeholder,
   ...props
 }: GlassInputProps) => {
   const theme = isDarkMode ? COLORS.app.dark : COLORS.app.light;
+  const [editorVisible, setEditorVisible] = useState(false);
+
+  if (multiline) {
+    return (
+      <View style={styles.container}>
+        <Text style={[
+          styles.label,
+          { color: theme.textSecondary, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 600) }
+        ]}>
+          {label}
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setEditorVisible(true)}
+          style={[
+            styles.inputWrapper,
+            styles.inputWrapperMultiline,
+            {
+              backgroundColor: theme.inputBackground,
+              borderColor: error ? theme.error : isDarkMode ? theme.inputBorder : 'rgba(0,0,0,0.05)',
+              alignItems: 'stretch',
+            },
+          ]}
+        >
+          <Text
+            numberOfLines={4}
+            style={{
+              color: value ? theme.textBody : (isDarkMode ? '#636366' : '#C7C7CC'),
+              fontSize: TYPOGRAPHY.fontSize.md,
+              lineHeight: 22,
+              fontFamily: getFontFamily(isRTL, 400),
+              textAlign: isRTL ? 'right' : 'left',
+            }}
+          >
+            {value || placeholder || label}
+          </Text>
+
+          {/* iOS Expand Indicator Icon */}
+          <Ionicons
+            name="expand-outline"
+            size={14}
+            color={theme.textSecondary}
+            style={{ position: 'absolute', bottom: 8, right: isRTL ? undefined : 12, left: isRTL ? 12 : undefined }}
+          />
+        </TouchableOpacity>
+
+        {error && (
+          <View style={[styles.errorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Ionicons name="alert-circle" size={14} color={theme.error} />
+            <Text style={[
+              styles.errorText,
+              { color: theme.error, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 400) }
+            ]}>
+              {error}
+            </Text>
+          </View>
+        )}
+
+        <LargeTextEditorSheet
+          visible={editorVisible}
+          onClose={() => setEditorVisible(false)}
+          label={label}
+          value={value}
+          placeholder={placeholder}
+          isDarkMode={isDarkMode}
+          isRTL={isRTL}
+          onSave={(text) => {
+            if (onChangeText) {
+              onChangeText(text);
+            }
+          }}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -33,7 +107,6 @@ export const GlassInput = ({
       <View
         style={[
           styles.inputWrapper,
-          multiline && styles.inputWrapperMultiline,
           {
             backgroundColor: theme.inputBackground,
             borderColor: error ? theme.error : isDarkMode ? theme.inputBorder : 'rgba(0,0,0,0.05)',
@@ -44,13 +117,12 @@ export const GlassInput = ({
           placeholderTextColor={isDarkMode ? '#636366' : '#C7C7CC'}
           style={[
             styles.input,
-            multiline && styles.inputMultiline,
             { color: theme.textBody, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 400) },
             style,
           ]}
-          multiline={multiline}
-          numberOfLines={multiline ? numberOfLines : undefined}
-          textAlignVertical={multiline ? 'top' : 'center'}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
           {...props}
         />
       </View>

@@ -11,14 +11,7 @@ const STROKE = 3;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-interface ExportButtonProps {
-  theme: any;
-  isRTL: boolean;
-  t: any;
-  exportStatus: 'idle' | 'generating' | 'completed';
-  onPress: () => void;
-  onReShare: () => void;
-}
+import { ExportButtonProps } from '../types/components';
 
 export const ExportButton = ({ theme, isRTL, t, exportStatus, onPress, onReShare }: ExportButtonProps) => {
   const progress = useRef(new Animated.Value(0)).current;
@@ -35,6 +28,9 @@ export const ExportButton = ({ theme, isRTL, t, exportStatus, onPress, onReShare
       }).start();
       const id = progress.addListener(({ value }) => setDisplay(Math.round(value)));
       return () => progress.removeListener(id);
+    } else if (exportStatus === 'completed') {
+      progress.setValue(100);
+      setDisplay(100);
     }
   }, [exportStatus]);
 
@@ -65,7 +61,7 @@ export const ExportButton = ({ theme, isRTL, t, exportStatus, onPress, onReShare
     return (
       <View style={styles.ringWrap}>
         <Svg width={SIZE} height={SIZE}>
-          <Circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} stroke="rgba(255,255,255,0.15)" strokeWidth={STROKE} fill="none" />
+          <Circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} stroke={theme.inputBackground} strokeWidth={STROKE} fill="none" />
           <AnimatedCircle
             cx={SIZE / 2}
             cy={SIZE / 2}
@@ -80,7 +76,7 @@ export const ExportButton = ({ theme, isRTL, t, exportStatus, onPress, onReShare
           />
         </Svg>
         <View style={styles.labelWrap}>
-          <Text style={[styles.percent, { color: theme.buttonText }]}>{display}%</Text>
+          <Text style={[styles.percent, { color: theme.textPrimary }]}>{display}%</Text>
         </View>
       </View>
     );
@@ -108,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 9999,
+    borderRadius: 14,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
     shadowColor: '#000',

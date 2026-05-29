@@ -15,7 +15,7 @@
     "jsx": "react-native",
     "noEmit": true,
     "strict": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true

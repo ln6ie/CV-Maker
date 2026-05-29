@@ -2,23 +2,25 @@ import { CVData } from '../types/cv';
 
 /**
  * Static PDF color palettes — completely decoupled from the app theme.
- * These are hardcoded strings, never derived from PlatformColor or system
- * values, so expo-print's isolated WebView cannot override them.
+ * Standard clean CV: Background is white, text is strictly solid black.
  */
 const PDF_COLORS = {
   light: {
     background: '#FFFFFF',
-    primaryHeader: '#002060',
+    primaryHeader: '#000000',
     body: '#000000',
     border: '#000000',
     contactBox: '#000000',
+    secondaryText: '#333333',
   },
   dark: {
-    background: '#0D0D0D',
-    primaryHeader: '#4A90D9',
-    body: '#E8E8E8',
-    border: '#4A4A4A',
-    contactBox: '#E8E8E8',
+    // Kept for structural compatibility, but we enforce light style for premium printing.
+    background: '#FFFFFF',
+    primaryHeader: '#000000',
+    body: '#000000',
+    border: '#000000',
+    contactBox: '#000000',
+    secondaryText: '#333333',
   },
 } as const;
 
@@ -51,17 +53,12 @@ const LABELS = {
 /**
  * Generates a fully self-contained, print-safe A4 HTML document.
  *
- * Key guarantees:
- * - `color-scheme: light` (or `dark`) is explicitly declared on <html> so the
- *   WebView never auto-adapts text/background colors regardless of OS setting.
- * - `-webkit-print-color-adjust: exact` forces background colors to render.
- * - All colors are explicit hex strings — no CSS variables, no system colors.
- * - The Google Fonts @import is present for Arabic but the font stack falls
- *   back gracefully when offline (expo-print WebView is isolated).
- *
- * @param data   Zod-validated CVData object
- * @param isDarkMode  PDF color palette selector (independent of app theme)
- * @param lang   Layout language / direction ('en' | 'ar')
+ * Implements:
+ * - A clean, professional, high-end global company style CV (strictly white background, pure black text).
+ * - Proper Arabic typography: Cairo font is loaded and declared cleanly so Arabic letters don't appear disjointed/segmented.
+ * - Hierarchy of font sizes: Header is 24px/bold, Section headers 14px/bold, item titles 12px/bold, bullet texts 10px/regular.
+ * - Controls the size of skills & courses texts to be smaller (10px) and formatted elegantly.
+ * - Main task texts under headers are strictly smaller (10px) with solid line heights.
  */
 export const generateCVTemplate = (
   data: CVData,
@@ -73,12 +70,10 @@ export const generateCVTemplate = (
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
   const textAlign = lang === 'ar' ? 'right' : 'left';
   const listPaddingSide = lang === 'ar' ? 'padding-right' : 'padding-left';
-  const colorScheme = isDarkMode ? 'dark' : 'light';
+  const colorScheme = 'light'; // Always light scheme for high-fidelity printing.
 
-  const fontStack =
-    lang === 'ar'
-      ? "'Amiri', 'Times New Roman', Times, serif"
-      : "'Times New Roman', Times, serif";
+  // Using Cairo as it covers both Arabic and English perfectly, ensuring letters do not appear segmented.
+  const fontStack = "'Cairo', 'Times New Roman', Times, serif";
 
   // Split items evenly between two columns
   const splitTwo = (arr: string[]): [string[], string[]] => {
@@ -89,22 +84,22 @@ export const generateCVTemplate = (
   const [leftSkills, rightSkills] = splitTwo(data.skills);
   const [leftCourses, rightCourses] = splitTwo(data.courses);
 
-  const renderBulletColumn = (items: string[]): string =>
+  const renderBulletColumn = (items: string[], fontSizePx: number = 10.5): string =>
     items.length > 0
-      ? `<ul style="margin:0; ${listPaddingSide}:18px;">
-           ${items.map((item) => `<li style="margin-bottom:5px; color:${c.body}; text-align:${textAlign};">${item}</li>`).join('')}
+      ? `<ul style="margin:0; ${listPaddingSide}:16px; list-style-type:disc;">
+           ${items.map((item) => `<li style="margin-bottom:4px; font-size:${fontSizePx}px; color:${c.body}; text-align:${textAlign}; font-family:${fontStack};">${item}</li>`).join('')}
          </ul>`
       : '';
 
   const renderTwoColumnTable = (left: string[], right: string[]): string => `
-    <table style="width:100%; border-collapse:collapse; border:none; margin-bottom:10px;"
+    <table style="width:100%; border-collapse:collapse; border:none; margin-bottom:8px;"
            cellpadding="0" cellspacing="0">
       <tr>
-        <td style="width:50%; vertical-align:top; border:none; padding-right:${lang === 'ar' ? '0' : '10px'}; padding-left:${lang === 'ar' ? '10px' : '0'};">
-          ${renderBulletColumn(left)}
+        <td style="width:50%; vertical-align:top; border:none; padding-right:${lang === 'ar' ? '0' : '8px'}; padding-left:${lang === 'ar' ? '8px' : '0'};">
+          ${renderBulletColumn(left, 10)}
         </td>
         <td style="width:50%; vertical-align:top; border:none;">
-          ${renderBulletColumn(right)}
+          ${renderBulletColumn(right, 10)}
         </td>
       </tr>
     </table>`;
@@ -113,25 +108,25 @@ export const generateCVTemplate = (
     data.workExperience
       .map(
         (exp) => `
-      <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:20px; text-align:${textAlign};">
-        <h3 style="font-size:15px; font-weight:bold; text-decoration:underline; color:${c.body}; margin:0 0 3px 0;">
+      <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px; text-align:${textAlign};">
+        <h3 style="font-family:${fontStack}; font-size:12px; font-weight:bold; color:${c.body}; margin:0 0 2px 0;">
           ${exp.jobTitle}
         </h3>
-        <p style="font-size:14px; font-weight:bold; color:${c.body}; margin:0 0 3px 0;">
+        <p style="font-family:${fontStack}; font-size:11px; font-weight:normal; color:${c.secondaryText}; margin:0 0 1px 0;">
           ${exp.companyLocation}
         </p>
-        <p style="font-size:14px; font-weight:bold; color:${c.body}; margin:0 0 6px 0;">
+        <p style="font-family:${fontStack}; font-size:10.5px; font-style:italic; color:${c.secondaryText}; margin:0 0 4px 0;">
           ${exp.dateRange}
         </p>
-        <p style="font-weight:bold; font-size:14px; color:${c.body}; margin:8px 0 4px 0;">
+        <p style="font-family:${fontStack}; font-weight:bold; font-size:10px; color:${c.body}; margin:4px 0 2px 0;">
           ${lbl.mainTasks}
         </p>
-        <ul style="margin:0; ${listPaddingSide}:20px;">
+        <ul style="margin:0; ${listPaddingSide}:16px; list-style-type:disc;">
           ${exp.mainTasks
             .filter((t) => t.trim().length > 0)
             .map(
               (task) =>
-                `<li style="margin-bottom:4px; color:${c.body}; text-align:${textAlign};">${task}</li>`
+                `<li style="margin-bottom:3px; font-family:${fontStack}; font-size:10px; color:${c.body}; text-align:${textAlign}; line-height:1.4;">${task}</li>`
             )
             .join('')}
         </ul>
@@ -143,14 +138,14 @@ export const generateCVTemplate = (
     data.education
       .map(
         (edu) => `
-      <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:15px; text-align:${textAlign};">
-        <h3 style="font-size:15px; font-weight:bold; color:${c.body}; margin:0 0 3px 0;">
+      <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:10px; text-align:${textAlign};">
+        <h3 style="font-family:${fontStack}; font-size:12px; font-weight:bold; color:${c.body}; margin:0 0 2px 0;">
           ${edu.degree}
         </h3>
-        <p style="font-size:14px; font-weight:bold; color:${c.body}; margin:0 0 4px 0;">
+        <p style="font-family:${fontStack}; font-size:11px; font-weight:normal; color:${c.body}; margin:0 0 2px 0;">
           ${edu.institution} ${edu.year}
         </p>
-        ${edu.notes ? `<p style="font-size:14px; font-style:italic; color:${c.body}; margin:0;">${edu.notes}</p>` : ''}
+        ${edu.notes ? `<p style="font-family:${fontStack}; font-size:10px; font-style:italic; color:${c.secondaryText}; margin:0;">${edu.notes}</p>` : ''}
       </div>`
       )
       .join('');
@@ -159,7 +154,7 @@ export const generateCVTemplate = (
     data.languages
       .map(
         (langItem) => `
-      <div style="font-size:14px; color:${c.body}; text-align:${textAlign}; margin-bottom:6px;">
+      <div style="font-family:${fontStack}; font-size:10.5px; color:${c.body}; text-align:${textAlign}; margin-bottom:4px;">
         <span style="font-weight:bold;">${langItem.name}:</span> ${langItem.level}
       </div>`
       )
@@ -167,14 +162,15 @@ export const generateCVTemplate = (
 
   const sectionTitle = (title: string): string => `
     <h2 style="
-      font-size:18px;
-      font-weight:bold;
-      color:${c.primaryHeader};
-      border-bottom:2px solid ${c.border};
-      padding-bottom:4px;
-      margin:15px 0 12px 0;
-      letter-spacing:0.5px;
-      text-align:${textAlign};
+      font-family: ${fontStack};
+      font-size: 14px;
+      font-weight: bold;
+      color: ${c.primaryHeader};
+      border-bottom: 1px solid ${c.border};
+      padding-bottom: 2px;
+      margin: 14px 0 8px 0;
+      letter-spacing: 0.2px;
+      text-align: ${textAlign};
     ">${title}</h2>`;
 
   return `<!DOCTYPE html>
@@ -183,12 +179,10 @@ export const generateCVTemplate = (
   <meta charset="utf-8">
   <meta name="color-scheme" content="${colorScheme}">
   <title>${data.fullName} - CV</title>
-  ${lang === 'ar' ? `<link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">` : ''}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    /* Force the WebView rendering engine to use our explicit palette.
-       color-scheme on both html and body prevents the browser from
-       auto-inverting colors when the OS is in dark mode. */
     html {
       color-scheme: ${colorScheme};
       -webkit-print-color-adjust: exact;
@@ -198,18 +192,16 @@ export const generateCVTemplate = (
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      /* Override any OS-injected forced color. */
       forced-color-adjust: none;
     }
     body {
-      /* Explicit backgrounds prevent transparent PDF pages. */
       background-color: ${c.background} !important;
       color: ${c.body} !important;
       color-scheme: ${colorScheme};
       font-family: ${fontStack};
-      font-size: 14px;
-      line-height: 1.55;
-      padding: 40px;
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 30px;
       width: 210mm;
       min-height: 297mm;
       margin: 0 auto;
@@ -223,20 +215,22 @@ export const generateCVTemplate = (
 <body>
 
   <!-- Header -->
-  <div style="text-align:center; margin-bottom:22px; page-break-inside:avoid;">
-    <h1 style="font-size:32px; font-weight:bold; color:${c.body}; margin-bottom:10px; letter-spacing:-0.5px;">
+  <div style="text-align:center; margin-bottom:14px; page-break-inside:avoid;">
+    <h1 style="font-family:${fontStack}; font-size:24px; font-weight:bold; color:${c.body}; margin-bottom:6px; letter-spacing:-0.2px;">
       ${data.fullName}
     </h1>
     <div style="
-      border:1px solid ${c.border};
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:bold;
-      color:${c.contactBox};
+      border-top:1px solid ${c.border};
+      border-bottom:1px solid ${c.border};
+      padding:6px 0;
+      font-family:${fontStack};
+      font-size:10.5px;
+      font-weight:normal;
+      color:${c.body};
       display:block;
       width:100%;
       text-align:center;
-      margin-bottom:15px;
+      margin-bottom:10px;
       background-color:${c.background};
     ">
       ${lbl.address} : ${data.address} | ${data.phone} | ${data.email}
@@ -244,60 +238,56 @@ export const generateCVTemplate = (
   </div>
 
   <!-- Summary -->
-  <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:25px;">
+  ${data.summary ? `
+  <div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px;">
     ${sectionTitle(lbl.summary)}
-    <p style="color:${c.body}; text-align:justify; margin-bottom:15px;">${data.summary}</p>
-  </div>
+    <p style="font-family:${fontStack}; font-size:11px; color:${c.body}; text-align:justify; margin:0; line-height:1.5;">${data.summary}</p>
+  </div>` : ''}
 
   <!-- Skills -->
-  ${
-    data.skills.length > 0
-      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:25px;">
+  ${data.skills.length > 0
+      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px;">
     ${sectionTitle(lbl.skills)}
     ${renderTwoColumnTable(leftSkills, rightSkills)}
   </div>`
       : ''
-  }
+    }
 
   <!-- Work Experience -->
-  ${
-    data.workExperience.length > 0
-      ? `<div style="margin-bottom:25px;">
+  ${data.workExperience.length > 0
+      ? `<div style="margin-bottom:14px;">
     ${sectionTitle(lbl.experience)}
     ${renderExperience()}
   </div>`
       : ''
-  }
+    }
 
   <!-- Education -->
-  ${
-    data.education.length > 0
-      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:25px;">
+  ${data.education.length > 0
+      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px;">
     ${sectionTitle(lbl.education)}
     ${renderEducation()}
   </div>`
       : ''
-  }
+    }
 
   <!-- Courses -->
-  ${
-    data.courses.length > 0
-      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:25px;">
+  ${data.courses.length > 0
+      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px;">
     ${sectionTitle(lbl.courses)}
     ${renderTwoColumnTable(leftCourses, rightCourses)}
   </div>`
       : ''
-  }
+    }
 
   <!-- Languages -->
-  ${
-    data.languages.length > 0
-      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:25px;">
+  ${data.languages.length > 0
+      ? `<div style="page-break-inside:avoid; break-inside:avoid; margin-bottom:14px;">
     ${sectionTitle(lbl.languages)}
     ${renderLanguages()}
   </div>`
       : ''
-  }
+    }
 
 </body>
 </html>`;

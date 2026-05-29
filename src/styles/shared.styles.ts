@@ -3,7 +3,7 @@ import { SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/tokens';
 
 export const FLOATING_HEADER_HEIGHT = 110;
 
-export const styles = StyleSheet.create({
+export const sharedStyles = StyleSheet.create({
   root: {
     flex: 1,
   },
@@ -42,7 +42,6 @@ export const styles = StyleSheet.create({
     height: 4,
     borderRadius: BORDER_RADIUS.sm,
   },
-
   experienceSubCard: {
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
@@ -80,8 +79,6 @@ export const styles = StyleSheet.create({
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.xl,
     paddingHorizontal: SPACING.lg,
-    // Do NOT use alignItems: 'center' — it collapses children widths
-    // and prevents adjustsFontSizeToFit from having a boundary to measure.
     alignItems: 'stretch',
   },
   sheetTitle: {
@@ -89,7 +86,6 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
     marginBottom: SPACING.md,
-    // width: '100%' ensures adjustsFontSizeToFit has a bounded box to shrink into.
     width: '100%',
     textAlign: 'center',
   },
@@ -104,7 +100,6 @@ export const styles = StyleSheet.create({
   sheetButtonText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: '700',
-    // width: '100%' gives adjustsFontSizeToFit a definite boundary.
     width: '100%',
     textAlign: 'center',
   },
@@ -121,5 +116,34 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     width: '100%',
     textAlign: 'center',
+  },
+  snackPill: {
+    position: 'absolute',
+    left: SPACING.lg,
+    right: SPACING.lg,
+    borderRadius: 9999,
+    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    zIndex: 60,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

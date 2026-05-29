@@ -1,30 +1,36 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Text, StyleSheet, StatusBar } from 'react-native';
+import { SplashProps } from '../types/components';
 
-interface SplashProps {
-  onFinish: () => void;
-}
-
-export const Splash = ({ onFinish }: SplashProps) => {
+export const Splash = ({ onFinish, isThemeReady }: SplashProps) => {
   const scale = useRef(new Animated.Value(0.85)).current;
   const fadeIn = useRef(new Animated.Value(0)).current;
   const fadeOut = useRef(new Animated.Value(1)).current;
+  
+  // Track animation completion state to synchronize with theme load
+  const [introAnimationDone, setIntroAnimationDone] = useState(false);
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeIn, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.delay(2000),
+    // 1. Trigger the intro scale and opacity animation
+    Animated.parallel([
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeIn, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIntroAnimationDone(true);
+    });
+  }, []);
+
+  // 2. Once the intro animation finishes AND the theme is loaded, trigger exit transition
+  useEffect(() => {
+    if (introAnimationDone && isThemeReady) {
       Animated.parallel([
         Animated.timing(scale, {
           toValue: 1.05,
@@ -36,9 +42,9 @@ export const Splash = ({ onFinish }: SplashProps) => {
           duration: 800,
           useNativeDriver: true,
         }),
-      ]),
-    ]).start(onFinish);
-  }, []);
+      ]).start(onFinish);
+    }
+  }, [introAnimationDone, isThemeReady]);
 
   return (
     <Animated.View style={[styles.root, { opacity: fadeOut }]}>
