@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, ScrollView, Text, TouchableOpacity, KeyboardAvoidingView,
-  Platform, Modal, Animated,
+  Platform, Modal, Animated, StyleSheet,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +13,6 @@ import { CVProvider, useCVContext } from './src/context/CVContext';
 import { sharedStyles, FLOATING_HEADER_HEIGHT } from './src/styles/shared.styles';
 import { Header } from './src/components/Header';
 import { StatusBanner } from './src/components/StatusBanner';
-import { Splash } from './src/components/Splash';
 import { Step0Personal } from './src/screens/Step0Personal';
 import { Step1Experience } from './src/screens/Step1Experience';
 import { Step2Education } from './src/screens/Step2Education';
@@ -124,12 +123,33 @@ function AppBoot() {
   );
 }
 
+import { IntroScreen } from './src/screens/IntroScreen';
+
 function AppGate({ fontsLoaded, showSplash, setShowSplash }: { fontsLoaded: boolean; showSplash: boolean; setShowSplash: (v: boolean) => void }) {
-  const { themeLoaded } = useCVContext();
-  if (showSplash || !fontsLoaded || !themeLoaded) {
-    return <Splash isThemeReady={themeLoaded} onFinish={() => setShowSplash(false)} />;
-  }
-  return <AppShell />;
+  const { themeLoaded, theme } = useCVContext();
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+  };
+
+  const initialBg = theme?.background || '#0A0A0C';
+
+  return (
+    <View style={{ flex: 1, backgroundColor: initialBg }}>
+      {/* 
+        AppShell renders underneath the splash overlay once themes are loaded.
+        Since IntroScreen shares the same parent View from frame 1, React preserves
+        its state and animations perfectly when AppShell mounts!
+      */}
+      {themeLoaded && <AppShell />}
+      {showSplash && (
+        <IntroScreen
+          isThemeReady={themeLoaded && fontsLoaded}
+          onFinish={handleSplashFinish}
+        />
+      )}
+    </View>
+  );
 }
 
 export default function App() {

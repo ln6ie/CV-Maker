@@ -25,10 +25,6 @@ export interface ExportButtonProps {
   onReShare: () => void;
 }
 
-export interface SplashProps {
-  onFinish: () => void;
-  isThemeReady: boolean;
-}
 
 export interface LargeTextEditorSheetProps {
   visible: boolean;

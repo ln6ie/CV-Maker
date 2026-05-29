@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Strict Zod schema for a single Work Experience item.
  */
-export const WorkExperienceSchema = z.object({
+const WorkExperienceSchema = z.object({
   jobTitle: z.string().min(1, { message: 'Job title is required' }),
   companyLocation: z.string().min(1, { message: 'Company name and location are required' }),
   dateRange: z.string().min(1, { message: 'Date range is required' }),
@@ -14,7 +14,7 @@ export const WorkExperienceSchema = z.object({
 /**
  * Strict Zod schema for a single Education item.
  */
-export const EducationSchema = z.object({
+const EducationSchema = z.object({
   degree: z.string().min(1, { message: 'Degree or certificate title is required' }),
   institution: z.string().min(1, { message: 'Institution name is required' }),
   year: z.string().min(1, { message: 'Graduation year or date range is required' }),
@@ -24,7 +24,7 @@ export const EducationSchema = z.object({
 /**
  * Strict Zod schema for a single Language item.
  */
-export const LanguageSchema = z.object({
+const LanguageSchema = z.object({
   name: z.string().min(1, { message: 'Language name is required' }),
   level: z.string().min(1, { message: 'Proficiency level is required' }),
 });
@@ -53,5 +53,5 @@ export const CVSchema = z.object({
 
 export type WorkExperience = z.infer<typeof WorkExperienceSchema>;
 export type Education = z.infer<typeof EducationSchema>;
-export type Language = z.infer<typeof LanguageSchema>;
 export type CVData = z.infer<typeof CVSchema>;
+export type Language = z.infer<typeof LanguageSchema>;

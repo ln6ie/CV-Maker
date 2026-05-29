@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "commonjs",
     "lib": [
       "es2015",
       "es2016",
@@ -15,7 +14,6 @@
     "jsx": "react-native",
     "noEmit": true,
     "strict": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true

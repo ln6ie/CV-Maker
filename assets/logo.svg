@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <!-- Elegant Outer Shield/Circle in solid vibrant brand blue -->
+  <circle cx="256" cy="256" r="220" stroke="#007AFF" stroke-width="12" fill="none" opacity="0.9" />
+
+  <!-- Premium Brand Monogram (R) in solid vibrant brand blue -->
+  <path
+    d="M170,140 C170,140 280,80 320,160 C360,230 300,300 240,310 C320,340 350,420 350,420"
+    stroke="#007AFF"
+    stroke-width="26"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <path
+    d="M185,120 L185,420"
+    stroke="#007AFF"
+    stroke-width="30"
+    stroke-linecap="round"
+    fill="none"
+  />
+</svg>
