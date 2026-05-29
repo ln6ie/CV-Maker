@@ -80,7 +80,7 @@ export const UpdateShield = () => {
 
         <TouchableOpacity
           activeOpacity={0.8}
-          style={[styles.actionButton, { backgroundColor: theme.accent }]}
+          style={[styles.actionButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
           onPress={() => Linking.openURL(cfg.updateUrl).catch(() => {})}
         >
           <Ionicons name="cloud-download-outline" size={20} color="#FFFFFF" />
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 18,
     borderRadius: 9999,
-    shadowColor: '#007AFF',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
