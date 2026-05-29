@@ -339,7 +339,7 @@ Start now by welcoming me warmly on behalf of "Raqeem CV" and asking the first q
                   placeholder={isRTL ? 'الصق كود الـ JSON أو رد الذكاء الاصطناعي هنا...' : 'Paste JSON or AI response here...'}
                   placeholderTextColor={isDarkMode ? '#636366' : '#C7C7CC'}
                   style={{
-                    backgroundColor: isDarkMode ? '#1C1C1E' : '#F2F2F7',
+                    backgroundColor: isDarkMode ? '#1C1C1E' : '#FFFFFF',
                     color: theme.textPrimary,
                     fontFamily: getFontFamily(isRTL, 400),
                     fontSize: 13,
@@ -349,6 +349,8 @@ Start now by welcoming me warmly on behalf of "Raqeem CV" and asking the first q
                     minHeight: 200,
                     textAlignVertical: 'top',
                     textAlign: isRTL ? 'right' : 'left',
+                    borderWidth: 1,
+                    borderColor: theme.cardBorder,
                   }}
                 />
                 {!jsonText.trim() && (
