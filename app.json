@@ -4,7 +4,7 @@
     "slug": "raqeem",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.svg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
@@ -13,13 +13,14 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/logo.svg"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
       },
       "package": "com.elcomlab.raqeem",
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/logo.svg"
+      "favicon": "./assets/favicon.png"
     }
   }
 }
