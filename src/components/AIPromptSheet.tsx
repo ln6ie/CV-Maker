@@ -221,7 +221,7 @@ Start now by welcoming me warmly on behalf of "Raqeem CV" and asking the first q
           ]}
         >
 
-          <SheetHeader title={isRTL ? 'مساعد رقيم الذكي (AI)' : 'Raqeem AI Assistant'} onClose={() => setIsAIPromptVisible(false)} isRTL={isRTL} isDarkMode={isDarkMode} theme={theme} showGrabber />
+          <SheetHeader title={isRTL ? 'مساعد رقيم  (AI)' : 'Raqeem AI Assistant'} onClose={() => setIsAIPromptVisible(false)} isRTL={isRTL} isDarkMode={isDarkMode} theme={theme} showGrabber />
 
 
           <View
@@ -287,7 +287,7 @@ Start now by welcoming me warmly on behalf of "Raqeem CV" and asking the first q
                   <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <Ionicons name="sparkles" size={18} color={theme.accent} />
                     <Text style={{ color: theme.textPrimary, fontFamily: getFontFamily(isRTL, 700), fontSize: 15 }}>
-                      {isRTL ? 'كيف تستخدم مساعد رقيم الذكي؟' : 'How to use Raqeem AI Assistant?'}
+                      {isRTL ? 'كيف تستخدم مساعد رقيم' : 'How to use Raqeem AI Assistant?'}
                     </Text>
                   </View>
                   <Text style={{ color: theme.textSecondary, fontFamily: getFontFamily(isRTL, 400), fontSize: 13, lineHeight: 20, textAlign: isRTL ? 'right' : 'left' }}>
