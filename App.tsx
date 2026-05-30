@@ -12,18 +12,21 @@ import { CVProvider, useCVContext } from './src/context/CVContext';
 import { sharedStyles } from './src/styles/shared.styles';
 import { Header } from './src/components/Header';
 import { StatusBanner } from './src/components/StatusBanner';
+import { Step0Template } from './src/screens/Step0Template';
 import { Step0Personal } from './src/screens/Step0Personal';
 import { Step1Experience } from './src/screens/Step1Experience';
 import { Step2Education } from './src/screens/Step2Education';
 import { Step3Export } from './src/screens/Step3Export';
 import { SettingsSheet } from './src/components/SettingsSheet';
 import { AIPromptSheet } from './src/components/AIPromptSheet';
+import { CVManager } from './src/components/CVManager';
 import { UpdateShield } from './src/components/UpdateShield';
 
 function AppShell() {
   const {
     theme, isDarkMode, isRTL, t, activeStep,
-    handleNext, handlePrev, handleOpenSettings, handleOpenAIPrompt,
+    handleNext, handlePrev, handleOpenSettings, handleOpenAIPrompt, handleOpenCVManager,
+    loadSampleCV,
     snackMessage, snackOpacity, snackTranslateY,
   } = useCVContext();
 
@@ -33,7 +36,7 @@ function AppShell() {
     <View style={[sharedStyles.root, { backgroundColor: theme.background }]}>
       <StatusBar translucent={true} style={isDarkMode ? 'light' : 'dark'} />
 
-      <Header isDarkMode={isDarkMode} onOpenSettings={handleOpenSettings} onOpenAIPrompt={handleOpenAIPrompt} theme={theme} isRTL={isRTL} t={t} activeStep={activeStep} />
+      <Header isDarkMode={isDarkMode} onOpenSettings={handleOpenSettings} onOpenAIPrompt={handleOpenAIPrompt} onOpenCVManager={handleOpenCVManager} onLoadSample={loadSampleCV} theme={theme} isRTL={isRTL} t={t} activeStep={activeStep} />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[sharedStyles.flex, { backgroundColor: theme.background }]}>
         <ScrollView
@@ -49,10 +52,11 @@ function AppShell() {
         >
           <StatusBanner />
 
-          {activeStep === 0 && <Step0Personal />}
-          {activeStep === 1 && <Step1Experience />}
-          {activeStep === 2 && <Step2Education />}
-          {activeStep === 3 && <Step3Export />}
+          {activeStep === 0 && <Step0Template />}
+          {activeStep === 1 && <Step0Personal />}
+          {activeStep === 2 && <Step1Experience />}
+          {activeStep === 3 && <Step2Education />}
+          {activeStep === 4 && <Step3Export />}
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -67,7 +71,7 @@ function AppShell() {
           </TouchableOpacity>
         )}
         <View style={{ flex: 1 }} />
-        {activeStep < 3 && (
+        {activeStep < 4 && (
           <TouchableOpacity style={[sharedStyles.fab, { backgroundColor: theme.buttonBackground }]} activeOpacity={0.7} onPress={handleNext}>
             <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={24} color={theme.buttonText} />
           </TouchableOpacity>
@@ -93,6 +97,7 @@ function AppShell() {
       {/* Render modular settings bottom sheet */}
       <SettingsSheet />
       <AIPromptSheet />
+      <CVManager />
     </View>
   );
 }

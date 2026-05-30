@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getFontFamily } from '../constants/tokens';
-import { GlassicView } from './Glassic';
 
 interface SheetHeaderProps {
   title: string;
@@ -61,12 +60,11 @@ export const SheetHeader = ({
         </Text>
 
         <View style={{ width: CLOSE_SIZE + 12, alignItems: 'flex-end' }}>
-          <GlassicView
-            cornerRadius={9999}
-            glassEffectStyle="regular"
-            isDarkMode={isDarkMode}
-            style={{ width: CLOSE_SIZE, height: CLOSE_SIZE }}
-          >
+          <View style={{
+            width: CLOSE_SIZE, height: CLOSE_SIZE, borderRadius: 9999,
+            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.08)' : '#E5E5EA',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
             <TouchableOpacity
               onPress={onClose}
               activeOpacity={0.65}
@@ -81,7 +79,7 @@ export const SheetHeader = ({
                 color={isDarkMode ? 'rgba(235,235,245,0.85)' : 'rgba(60,60,67,0.8)'}
               />
             </TouchableOpacity>
-          </GlassicView>
+          </View>
         </View>
       </View>
     </View>

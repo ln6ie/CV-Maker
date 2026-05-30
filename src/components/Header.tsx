@@ -10,13 +10,15 @@ interface HeaderProps {
   isDarkMode: boolean;
   onOpenSettings: () => void;
   onOpenAIPrompt: () => void;
+  onOpenCVManager: () => void;
+  onLoadSample: () => void;
   theme: any;
   isRTL: boolean;
   t: TranslationSet;
   activeStep: number;
 }
 
-export const Header = ({ isDarkMode, onOpenSettings, onOpenAIPrompt, theme, isRTL, t, activeStep }: HeaderProps) => {
+export const Header = ({ isDarkMode, onOpenSettings, onOpenAIPrompt, onOpenCVManager, onLoadSample, theme, isRTL, t, activeStep }: HeaderProps) => {
   return (
     <GlassicView
       cornerRadius={24}
@@ -44,6 +46,28 @@ export const Header = ({ isDarkMode, onOpenSettings, onOpenAIPrompt, theme, isRT
 
           <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: SPACING.sm, alignItems: 'center', marginRight: isRTL ? 0 : 12, marginLeft: isRTL ? 12 : 0 }}>
             <TouchableOpacity
+              onPress={onOpenCVManager}
+              activeOpacity={0.85}
+              style={[
+                styles.headerButton,
+                { backgroundColor: 'rgba(150, 150, 150, 0.15)' },
+              ]}
+            >
+              <Ionicons name="folder-outline" size={18} color={theme.textPrimary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={onLoadSample}
+              activeOpacity={0.85}
+              style={[
+                styles.headerButton,
+                { backgroundColor: 'rgba(150, 150, 150, 0.15)' },
+              ]}
+            >
+              <Ionicons name="flask-outline" size={18} color={theme.textSecondary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
               onPress={onOpenAIPrompt}
               activeOpacity={0.85}
               style={[
@@ -69,7 +93,7 @@ export const Header = ({ isDarkMode, onOpenSettings, onOpenAIPrompt, theme, isRT
 
         {/* Stepper */}
         <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 4, paddingHorizontal: 12 }}>
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <View
               key={i}
               style={{

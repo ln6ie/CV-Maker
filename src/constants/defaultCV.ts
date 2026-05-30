@@ -31,4 +31,5 @@ export const DEFAULT_CV: CVData = {
       level: '',
     }
   ],
+  template: 'classic',
 };

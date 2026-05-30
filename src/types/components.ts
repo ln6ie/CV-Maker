@@ -7,6 +7,8 @@ export interface GlassInputProps extends TextInputProps {
   error?: string;
   isRTL?: boolean;
   inlineMultiline?: boolean;
+  noCard?: boolean;
+  tip?: string;
 }
 
 export interface ExportButtonProps {

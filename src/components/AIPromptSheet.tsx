@@ -163,6 +163,7 @@ Start now by welcoming me warmly on behalf of "Raqeem CV" and asking the first q
         workExperience: Array.isArray(parsed.workExperience) ? parsed.workExperience : cvData.workExperience,
         education: Array.isArray(parsed.education) ? parsed.education : cvData.education,
         languages: Array.isArray(parsed.languages) ? parsed.languages : cvData.languages,
+        template: parsed.template ?? cvData.template ?? 'classic',
       };
 
       importCVData(merged);

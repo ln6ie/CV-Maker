@@ -1,8 +1,7 @@
 import React from 'react';
-import { Text, Platform } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { useCVContext } from '../context/CVContext';
 import { getFontFamily } from '../constants/tokens';
-import { GlassicView } from './Glassic';
 
 interface PremiumCardProps {
   children: React.ReactNode;
@@ -13,18 +12,24 @@ export const PremiumCard = ({ children, title }: PremiumCardProps) => {
   const { isDarkMode, isRTL, theme } = useCVContext();
 
   return (
-    <GlassicView
-      cornerRadius={24}
-      glassEffectStyle="regular"
-      isDarkMode={isDarkMode}
+    <View
       style={{
+        borderRadius: 24,
+        borderWidth: 1,
         marginBottom: 16,
-        padding: 24,
+        paddingHorizontal: 24,
+        paddingBottom: 24,
+        paddingTop: title ? 20 : 24,
+        backgroundColor: isDarkMode ? '#1C1C1E' : '#FFFFFF',
+        borderColor: isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(60,60,67,0.03)',
         ...Platform.select({
-          android: {
-            elevation: 2,
+          android: { elevation: 3 },
+          default: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDarkMode ? 0.3 : 0.04,
+            shadowRadius: 12,
           },
-          default: {},
         }),
       }}
     >
@@ -32,18 +37,18 @@ export const PremiumCard = ({ children, title }: PremiumCardProps) => {
         <Text
           style={{
             color: theme.textPrimary,
-            fontSize: 18,
-            fontWeight: '800',
-            letterSpacing: 0.5,
-            marginBottom: 16,
+            fontSize: 20,
+            fontWeight: '700',
+            letterSpacing: -0.3,
+            marginBottom: 20,
             textAlign: isRTL ? 'right' : 'left',
-            fontFamily: getFontFamily(isRTL, 800),
+            fontFamily: getFontFamily(isRTL, 700),
           }}
         >
           {title}
         </Text>
       )}
       {children}
-    </GlassicView>
+    </View>
   );
 };

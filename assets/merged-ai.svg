@@ -1,0 +1,38 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#0A84FF"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Claude-style: rounded rect frame -->
+  <rect x="10" y="10" width="492" height="492" rx="100" fill="url(#g)"/>
+  
+  <!-- Inner pattern: folded ribbon style, white/transparent -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    
+    <!-- Main folded diamond/lozenge - Claude-style continuous fold path -->
+    <path d="M160 256 C160 160 220 96 256 80 C292 96 352 160 352 256 C352 352 292 416 256 432 C220 416 160 352 160 256Z" opacity="0.9"/>
+    
+    <!-- Inner fold layer - left side folding in -->
+    <path d="M180 256 C180 180 230 120 256 106 C260 130 268 160 276 190 C256 200 210 230 200 256Z" opacity="0.85"/>
+    
+    <!-- Inner fold layer - right side folding in -->
+    <path d="M332 256 C332 180 282 120 256 106 C252 130 244 160 236 190 C256 200 302 230 312 256Z" opacity="0.85"/>
+    
+    <!-- Bottom fold layers -->
+    <path d="M180 256 C180 332 230 392 256 406 C260 382 268 352 276 322 C256 312 210 282 200 256Z" opacity="0.85"/>
+    
+    <path d="M332 256 C332 332 282 392 256 406 C252 382 244 352 236 322 C256 312 302 282 312 256Z" opacity="0.85"/>
+    
+    <!-- ChatGPT 3-fold: three small diamond cutouts in center -->
+    <path d="M256 230 C264 230 270 236 270 244 C270 252 264 258 256 258 C248 258 242 252 242 244 C242 236 248 230 256 230Z" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M240 262 C248 262 254 268 254 276 C254 284 248 290 240 290 C232 290 226 284 226 276 C226 268 232 262 240 262Z" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M272 262 C280 262 286 268 286 276 C286 284 280 290 272 290 C264 290 258 284 258 276 C258 268 264 262 272 262Z" fill="#FFFFFF" opacity="0.9"/>
+    
+    <!-- Gemini hint: subtle star-point lines radiating -->
+    <path d="M256 100 L256 80 M256 432 L256 452 M160 256 L140 256 M372 256 L392 256" stroke="#FFFFFF" stroke-width="2.5" opacity="0.7"/>
+    
+  </g>
+</svg>

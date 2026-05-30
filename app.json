@@ -8,7 +8,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elcomlab.raqeem"
+      "bundleIdentifier": "com.elcomlab.raqeem",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["chatgpt", "claude"]
+      }
     },
     "android": {
       "adaptiveIcon": {

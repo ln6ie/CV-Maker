@@ -10,6 +10,7 @@ import { COLORS } from '../constants/tokens';
 import { translations, Language } from '../constants/translations';
 import { generateCVTemplate } from '../services/cvTemplate';
 import { useCVState } from '../hooks/useCVState';
+import { SAMPLE_CV_EN, SAMPLE_CV_AR } from '../constants/sampleCV';
 import Constants from 'expo-constants';
 
 const CURRENT_VERSION = Constants.expoConfig?.version || '1.0.0';
@@ -46,6 +47,7 @@ interface CVContextType {
   themePreference: 'light' | 'dark' | 'system';
   isSettingsVisible: boolean;
   isAIPromptVisible: boolean;
+  isCVManagerVisible: boolean;
   theme: any;
   t: any;
   isRTL: boolean;
@@ -77,8 +79,11 @@ interface CVContextType {
   handleReShare: () => Promise<void>;
   handleOpenSettings: () => void;
   handleOpenAIPrompt: () => void;
+  handleOpenCVManager: () => void;
+  handleCloseCVManager: () => void;
   showSnack: (msg: string) => void;
   importCVData: (data: CVData) => void;
+  loadSampleCV: () => void;
 
   snackOpacity: Animated.Value;
   snackTranslateY: Animated.Value;
@@ -112,6 +117,7 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
   const [versionCheckComplete, setVersionCheckComplete] = useState(false);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isAIPromptVisible, setIsAIPromptVisible] = useState(false);
+  const [isCVManagerVisible, setIsCVManagerVisible] = useState(false);
 
   const snackOpacity = useRef(new Animated.Value(0)).current;
   const snackTranslateY = useRef(new Animated.Value(50)).current;
@@ -355,6 +361,10 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
     let global: string | null = null;
 
     if (step === 0) {
+      // Template selection — no validation required
+    }
+
+    if (step === 1) {
       if (!cvData.fullName.trim()) errors.fullName = v.required;
       if (!cvData.address.trim()) errors.address = v.required;
       if (!cvData.phone.trim()) errors.phone = v.required;
@@ -366,12 +376,12 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
       if (cvData.summary.trim().length < 20) errors.summary = v.summaryLength;
     }
 
-    if (step === 1) {
+    if (step === 2) {
       const valid = cvData.workExperience.filter(e => e.jobTitle.trim().length > 0);
       if (valid.length === 0) global = v.workExperienceRequired;
     }
 
-    if (step === 2) {
+    if (step === 3) {
       const valid = cvData.education.filter(e => e.degree.trim().length > 0);
       if (valid.length === 0) global = v.educationRequired;
     }
@@ -486,10 +496,25 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
     setIsAIPromptVisible(true);
   }, []);
 
+  const handleOpenCVManager = useCallback(() => {
+    setIsCVManagerVisible(true);
+  }, []);
+
+  const handleCloseCVManager = useCallback(() => {
+    setIsCVManagerVisible(false);
+  }, []);
+
   const importCVData = useCallback((data: CVData) => {
     dispatch({ type: 'SET_CV_DATA', data });
     clearExportCache();
   }, [dispatch, clearExportCache]);
+
+  const loadSampleCV = useCallback(() => {
+    const sample = activeLanguage === 'ar' ? SAMPLE_CV_AR : SAMPLE_CV_EN;
+    dispatch({ type: 'SET_CV_DATA', data: sample });
+    clearExportCache();
+    showSnack(activeLanguage === 'ar' ? 'تم تحميل نموذج السيرة الذاتية!' : 'Sample CV loaded!');
+  }, [dispatch, clearExportCache, activeLanguage, showSnack]);
 
   const ctx = useMemo<CVContextType>(() => ({
     cvData,
@@ -509,6 +534,7 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
     themePreference,
     isSettingsVisible,
     isAIPromptVisible,
+    isCVManagerVisible,
     theme,
     t,
     isRTL,
@@ -538,21 +564,24 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
     handleReShare,
     handleOpenSettings,
     handleOpenAIPrompt,
+    handleOpenCVManager,
+    handleCloseCVManager,
     showSnack,
     importCVData,
+    loadSampleCV,
     snackOpacity,
     snackTranslateY,
   }), [
     cvData, activeStep, isDarkMode, activeLanguage, pdfLang,
     validationErrors, isLoading, systemError, exportStatus,
     snackMessage, themeLoaded, remoteConfig, versionBlocked, updateAvailable, themePreference,
-    isSettingsVisible, isAIPromptVisible, theme, t, isRTL,
+    isSettingsVisible, isAIPromptVisible, isCVManagerVisible, theme, t, isRTL,
     updateField, updateSkillsString, updateCoursesString,
     updateWorkExperience, updateWorkExperienceTask,
     addWorkExperienceTask, addWorkExperience, removeWorkExperience,
     handleUpdateEducation, handleUpdateLanguage,
     handleNext, handlePrev, handleExportAction, handleReShare,
-    handleOpenSettings, handleOpenAIPrompt, showSnack, importCVData, snackOpacity, snackTranslateY,
+    handleOpenSettings, handleOpenAIPrompt, handleOpenCVManager, handleCloseCVManager, showSnack, importCVData, loadSampleCV, snackOpacity, snackTranslateY,
   ]);
 
   return <CVContext.Provider value={ctx}>{children}</CVContext.Provider>;
